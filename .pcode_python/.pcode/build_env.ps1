@@ -3,9 +3,13 @@ Write-Output "Building Virtual Environment..."
 $python = [io.path]::Combine((Get-Location).Drive.Root, "Python36", "Python.exe")
 if ([System.IO.File]::Exists($python)) {
     # Start building the env
-    if ((Split-Path (Get-Location) -Leaf) -eq ".vscode") {
-    	# Stepping out of .vscode dir
-	Set-Location ..
+    if (Test-Path env:PWD) {
+        Set-Location $env:PWD
+    } else {
+        if ((Split-Path (Get-Location) -Leaf) -eq ".pcode") {
+            # Stepping out of .pcode dir
+        Set-Location ..
+        }
     }
     & $python -m venv venv
     & .\venv\Scripts\activate.ps1

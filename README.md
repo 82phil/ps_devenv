@@ -1,16 +1,34 @@
 # Introduction
 
-This is a Powershell Profile used to setup VS Code and a Python Virtual Environment for Python Projects.
+This updates the PowerShell profile for aliases to automate setup of a development
+environment. The examples provided are tuned to my workflow but hopefully
+provide enough to allow you to implement your own. 
 
-# Powershell Profile Setup
+# Use Case
 
-Open powershell and execute the following command
+Instead of manually building (or rebuilding) a Python virtual environment
+and running pip commands to install packages this is meant to do it all in one
+shot, like so:
+
+1. Clone down repository
+2. Launch Powershell and type `code_python`, grab a cup of coffee
+
+The script automates the workflow of creating the Python virtualenv and pip
+installing packages. A moment or two later everything should be ready.
+
+[More Information](./.pcode_python/.pcode/README.md)
+
+# Installation 
+
+If you don't know if you already have a profile in Powershell, open powershell
+and execute the following command
 
 ```powershell
 test-path $profile
 ```
 
-If the profile exists, the response is True; otherwise, it is False.
+If the profile exists, the response is True; otherwise, it is False. If it does
+exists, skip to the existing profile section.
 
 ## New Profile
 
@@ -20,9 +38,10 @@ To create a Windows PowerShell profile file, type:
 new-item -path $profile -itemtype file -force
 ```
 
-Then copy the .ps1 profile script and the .vscode directory over to
-the profile directory.
+Then update the .ps1 profile script with the profile script in this repository, also
+copy the directories in this repository over to where the profile script is.
 
 ## Existing Profile
 
-Copy the .vscode directory over the profile directory. Edit the existing profile and add the contents of the profile script.
+Copy the directories from this repository over the profile directory. Edit the
+existing profile and add the contents of the profile script.
