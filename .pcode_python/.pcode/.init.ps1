@@ -6,4 +6,4 @@ $old_location = Get-Location
 Write-Output "Copying Workspace..."
 Copy-Item -Path $pcode_python\* -Destination . -Recurse -Force
 # Build Environment
-& .pcode\build_env.ps1
+& .pcode\build_env.ps1 $args[0]
