@@ -13,6 +13,13 @@ code_python
 This will copy the directories under `%userprofile%\Documents\WindowsPowerShell`
 over to your current directory and run the build script.
 
+If multiple versions of Python are found, the script will ask to choose
+one. A version may also be passed in as an argument.
+
+```powershell
+code_python 2.7
+```
+
 # Workspace Aliases
 
 If a PowerShell session is started in the workspace root directory or has the $env:PWD path pointed to the workspace then aliases specific to the workspace are added.
