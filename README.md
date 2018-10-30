@@ -13,8 +13,10 @@ shot, like so:
 1. Clone down repository
 2. Launch Powershell and type `code_python`, grab a cup of coffee
 
-The script automates the workflow of creating the Python virtualenv and pip
-installing packages. A moment or two later everything should be ready.
+![code_python demonstration](./doc/code_python.gif)
+
+The script automates the workflow of creating the Python virtualenv and
+installing packages via pip. A moment or two later everything should be ready.
 
 [More Information](./.pcode_python/.pcode/README.md)
 
