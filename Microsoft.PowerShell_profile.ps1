@@ -2,6 +2,7 @@
 $profile_dir = Split-Path -path $profile
 $python_init = [io.path]::Combine($profile_dir, ".pcode_python", ".pcode", ".init.ps1")
 New-Alias code_python $python_init
+Clear-Host
 
 # .pcode autorun script if available
 $project_dir = if (Test-Path env:PWD) {$env:PWD} else {Get-Location}
@@ -9,12 +10,11 @@ $pcode_autorun = [io.path]::Combine($project_dir, ".pcode", "autorun.ps1")
 if ([System.IO.File]::Exists($pcode_autorun)) {
     . $pcode_autorun
 }
-
 # SIG # Begin signature block
 # MIIGlwYJKoZIhvcNAQcCoIIGiDCCBoQCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUU7Sk5j8oxLnpC5os4eTFabIq
-# fQGgggPOMIIDyjCCArKgAwIBAgIQTP3uDUHglaREeCKNEB56ujANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUt6keCUZ+6UTAblJI2Qj8TCI9
+# xXGgggPOMIIDyjCCArKgAwIBAgIQTP3uDUHglaREeCKNEB56ujANBgkqhkiG9w0B
 # AQUFADB9MSwwKgYDVQQLDCNodHRwczovL2dpdGh1Yi5jb20vODJwaGlsL3BzX2Rl
 # dmVudjEgMB4GCSqGSIb3DQEJARYRODIucGhpbEBnbWFpbC5jb20xFzAVBgNVBAoM
 # DlBoaWxpcCBIb2ZmbWFuMRIwEAYDVQQDDAlwc19kZXZlbnYwHhcNMTgxMDI5MDQy
@@ -40,11 +40,11 @@ if ([System.IO.File]::Exists($pcode_autorun)) {
 # EAYDVQQDDAlwc19kZXZlbnYCEEz97g1B4JWkRHgijRAeerowCQYFKw4DAhoFAKB4
 # MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQB
 # gjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkE
-# MRYEFPyerxiPj8vkZevQWg1goHjpN323MA0GCSqGSIb3DQEBAQUABIIBAKT1gvvK
-# IYx8c9wQ0g6GKoTvn/yh2q+ULL4XGQb/Y+AMvOZa9pGt7MDFzCW7ZximhM/LsUak
-# 8rmIqiXKRkE7hw7XwNsCFDKI6X4BMLPBPnsXFBEb6v9tMhM/JTzRRt1EEMCnN0HZ
-# 02hnjt7Esv2H9iI+pQ4kc8J4CsorLNixNppdSAKJJjbJj+qAM7U06RO7sU8y6eui
-# AsjDJFqOjTY3qKXzDwIxx5spvTm+L10BIkOY+Q20SryXJZhsT6N2YDke+RN75fNS
-# qZsNsVfNFbuWCvg8ukyuV/qda9IyVcn2/oHZxqvtxumJ0iSbVviVT0/CBDDpRRhO
-# QCPGcEEkHyiqTgU=
+# MRYEFPT23GMcn2RUbZliojm3sWbR6RioMA0GCSqGSIb3DQEBAQUABIIBAKWU5g9H
+# uAkB3ldS1DKEEfiRGHHViuXLb4IKFjETE9XcoWvy+7PEqc2sOacTDfPW1sX+VlaG
+# mn6in1hRgvWSsivpOaMGwDC5m/9VE4m4nSJBFK4M40XcRweLVGfHgRGjQkq+/MCt
+# qOMdzUl0x7UnbBVmgjfkaD66l94XWsHZdtnVMTmgVR+lLs0+eMld8eM09Fhv/XVN
+# bt/OfaT/GIBX2rspzPV4muq1lgpRAJfhbjgZGFhkpCwP1kUym/E9Jn67/lwpq0FT
+# mnIWDr/8oBtjRxlgh6r0YmmWZcp29dl27EXQpgn3gh1pKDcENNd5/I3iCosAeGV7
+# 70TF/7OCXIb+gQc=
 # SIG # End signature block
