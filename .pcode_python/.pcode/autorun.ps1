@@ -1,17 +1,11 @@
-function code_alias{
-    Param([string] $alias_name, [string] $script)
-    $project_dir = if (Test-Path env:PWD) {$env:PWD} else {Get-Location}
-    $script_path = [io.path]::Combine($project_dir, ".pcode", $script)
-    if ([System.IO.File]::Exists($script_path)) {
-        New-Alias $alias_name $script_path -Scope global
-    }
-    Write-Output "Python workspace alias $alias_name added"
+
+function New-Code {
+    . "build_env.ps1"
 }
 
-# Workspace Aliases
-
-code_alias -alias_name "build" -script "build_env.ps1"
-code_alias -alias_name "clean" -script "clean_env.ps1"
+function Reset-Code {
+    . "clean_env.ps1"
+}
 
 # Virtualenv Activate
 & {
@@ -22,12 +16,11 @@ code_alias -alias_name "clean" -script "clean_env.ps1"
         & $virtualenv_script
     }
 }
-
 # SIG # Begin signature block
 # MIIGlwYJKoZIhvcNAQcCoIIGiDCCBoQCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUC12cPp97mPAGJhR2vJ5cYFAD
-# oSGgggPOMIIDyjCCArKgAwIBAgIQTP3uDUHglaREeCKNEB56ujANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU+rQlQ88wxC+gfNOpUCC9HuMR
+# Hs+gggPOMIIDyjCCArKgAwIBAgIQTP3uDUHglaREeCKNEB56ujANBgkqhkiG9w0B
 # AQUFADB9MSwwKgYDVQQLDCNodHRwczovL2dpdGh1Yi5jb20vODJwaGlsL3BzX2Rl
 # dmVudjEgMB4GCSqGSIb3DQEJARYRODIucGhpbEBnbWFpbC5jb20xFzAVBgNVBAoM
 # DlBoaWxpcCBIb2ZmbWFuMRIwEAYDVQQDDAlwc19kZXZlbnYwHhcNMTgxMDI5MDQy
@@ -53,11 +46,11 @@ code_alias -alias_name "clean" -script "clean_env.ps1"
 # EAYDVQQDDAlwc19kZXZlbnYCEEz97g1B4JWkRHgijRAeerowCQYFKw4DAhoFAKB4
 # MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQB
 # gjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkE
-# MRYEFDUZT9KzAy8ymX0KoU2c8Yz1pIrxMA0GCSqGSIb3DQEBAQUABIIBAE8ul6sD
-# atDTa4bXE2W/IukvdaCLiCGt2XJNBieJzr20uRJZA0ASIiqr5EabaxK4IQQZbZ0a
-# Lkv/78MrnUFOE4t5wsFK1RWRUkuisJ1tJDzYyAp9zbnBGUp9D20czSj8m3CYuPXq
-# zb6NE3zSOHKlOI+1mdx8P24HHCdlUFiHNNMF9VdJ3sw7gCZhcD8COm2NIMNdMtTI
-# HYHg76gs7E7q4TjhflM5F/UDnjwuozvExNqd7sYAjyQVr4Co1RPIGMri7gSxPdAP
-# wU259u9EXmZlVacxivNSDt9uLHFD+Gsrc1T9lpaygTZYH6l7+TdOTEj2kOb6eAl8
-# i7twNh10E0XQKtY=
+# MRYEFIk01Jj9SyyQ51wVjnDR7F/TlIagMA0GCSqGSIb3DQEBAQUABIIBALVjsfEO
+# MTc++8tGIOFajV0TsQG8ybVCfA3BrvgR6yxz9wFm30ZpLB/jsbHB+BE1X4wpXeZA
+# N7JXgUH+B0+3aOO+se7QO1Jp2mM9eAkyLRvPo3DMy9yRchU+1t/ZOuaDEEvM3VDk
+# Uazcr2rhXVxhVvOkbplGK7OnB7bCqZVuV4B0yBr1CfEEeKeMm9w+/MetkwYFXBvo
+# c+v2U0T1QcBAxG5Mw3VG/qcpdUfThbHvAjQiDDKhIs7dNhNEo5NShptDVkJA//vs
+# OsSEzZKLsjZSOuIHY3YzsSMGFWYY0nHrcp8W6LKEuGLwfdVab72jZB6mwHXKe2sp
+# Vbf2AgBmEALtTE8=
 # SIG # End signature block

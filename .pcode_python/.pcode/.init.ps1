@@ -1,18 +1,15 @@
-$profile_dir = Split-Path -path $profile
-$pcode_python = Join-Path -Path $profile_dir .pcode_python
-$old_location = Get-Location
+$pcode_python = Join-Path -Path $PSScriptRoot ..
 
 # Copy stuff over...
 Write-Output "Copying Workspace..."
 Copy-Item -Path $pcode_python\* -Destination . -Recurse -Force
 # Build Environment
 & .pcode\build_env.ps1 $args[0]
-
 # SIG # Begin signature block
 # MIIGlwYJKoZIhvcNAQcCoIIGiDCCBoQCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUK7WEgFf+Kxfef7p165uuL8w9
-# zzagggPOMIIDyjCCArKgAwIBAgIQTP3uDUHglaREeCKNEB56ujANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUeMgZJfVI8vIxksU2C8RrROXF
+# sgCgggPOMIIDyjCCArKgAwIBAgIQTP3uDUHglaREeCKNEB56ujANBgkqhkiG9w0B
 # AQUFADB9MSwwKgYDVQQLDCNodHRwczovL2dpdGh1Yi5jb20vODJwaGlsL3BzX2Rl
 # dmVudjEgMB4GCSqGSIb3DQEJARYRODIucGhpbEBnbWFpbC5jb20xFzAVBgNVBAoM
 # DlBoaWxpcCBIb2ZmbWFuMRIwEAYDVQQDDAlwc19kZXZlbnYwHhcNMTgxMDI5MDQy
@@ -38,11 +35,11 @@ Copy-Item -Path $pcode_python\* -Destination . -Recurse -Force
 # EAYDVQQDDAlwc19kZXZlbnYCEEz97g1B4JWkRHgijRAeerowCQYFKw4DAhoFAKB4
 # MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQB
 # gjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkE
-# MRYEFCejmu/EFwxiDEyjFOHSkDmchXWoMA0GCSqGSIb3DQEBAQUABIIBAGnoO3FR
-# 0tng0MEIsyW12bDuJo5kkJyrAIB+yUJ7MhOWIFPBk8EOdnuSfZT+6MZMV5jZDqzT
-# XF0YxzmMmYGldqv2fbUfyTeDeoQX1RyFqCBOzarAxJdjUHOi7TcV0Im7sZFmIzp9
-# GWQL/EtK+6cj58IykvH/tgvDbHwjVOXshTD6BXwfQtkrpV6ID+TZ75e9kihs/zeZ
-# MtA8Ws4e7mHXpXi/CDUX8DccxnCxv6iSPMIYVGjuvKPT5/M4PCOsZb5uPZZabAMu
-# FUxXpGZbAxT25JmPRkXCiF1kxCPigh+GnvSu7WWbGFhYj1HmzP/fr8bjiD7oOT9w
-# 0RqF17aWOWAEc7A=
+# MRYEFMEGdXAySstu0SGcEtp3D6R/6aBhMA0GCSqGSIb3DQEBAQUABIIBAMDnBY74
+# cZ/i/UUe5gHef7lxKFwL0t5zFjkf64VrZmM93MC47UPK5mYPKrLTeBI2xE75geMS
+# 5xfTtmuNomfyrVxi8HSoXiIT80y5LSTlTragZfZUYOwf6nPSV6sMwfM6Tiow6KXq
+# VWNNtzob3K/ZbPkItFW/CdlkCuDjvWtCGWBbR8ciGd8ZJehRfPXJSK7B/foyklXd
+# ctvQTw/zei2U18Ni5yER7RmQxN0TekFu4xOBfN4u6l3q2suLDMRaF0Zlfa5k01WC
+# QgldLObOXqThDCAYSmq61KnBfksLVrqDD1LTGVPrfRLIooWqjeRQjJpXW86JiQQS
+# Cik6CNhjGkqngc4=
 # SIG # End signature block
