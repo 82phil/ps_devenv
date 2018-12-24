@@ -9,12 +9,12 @@ $project_dir = if (Test-Path env:PWD) {$env:PWD} else {Get-Location}
 $pcode_autorun = [io.path]::Combine($project_dir, ".pcode", "autorun.ps1")
 if ([System.IO.File]::Exists($pcode_autorun)) {
     . $pcode_autorun
-}
+
 # SIG # Begin signature block
 # MIIGlwYJKoZIhvcNAQcCoIIGiDCCBoQCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUt6keCUZ+6UTAblJI2Qj8TCI9
-# xXGgggPOMIIDyjCCArKgAwIBAgIQTP3uDUHglaREeCKNEB56ujANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU+aOpXQ2X316YbJvtSC4rlflJ
+# 1sugggPOMIIDyjCCArKgAwIBAgIQTP3uDUHglaREeCKNEB56ujANBgkqhkiG9w0B
 # AQUFADB9MSwwKgYDVQQLDCNodHRwczovL2dpdGh1Yi5jb20vODJwaGlsL3BzX2Rl
 # dmVudjEgMB4GCSqGSIb3DQEJARYRODIucGhpbEBnbWFpbC5jb20xFzAVBgNVBAoM
 # DlBoaWxpcCBIb2ZmbWFuMRIwEAYDVQQDDAlwc19kZXZlbnYwHhcNMTgxMDI5MDQy
@@ -40,11 +40,11 @@ if ([System.IO.File]::Exists($pcode_autorun)) {
 # EAYDVQQDDAlwc19kZXZlbnYCEEz97g1B4JWkRHgijRAeerowCQYFKw4DAhoFAKB4
 # MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQB
 # gjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkE
-# MRYEFPT23GMcn2RUbZliojm3sWbR6RioMA0GCSqGSIb3DQEBAQUABIIBAKWU5g9H
-# uAkB3ldS1DKEEfiRGHHViuXLb4IKFjETE9XcoWvy+7PEqc2sOacTDfPW1sX+VlaG
-# mn6in1hRgvWSsivpOaMGwDC5m/9VE4m4nSJBFK4M40XcRweLVGfHgRGjQkq+/MCt
-# qOMdzUl0x7UnbBVmgjfkaD66l94XWsHZdtnVMTmgVR+lLs0+eMld8eM09Fhv/XVN
-# bt/OfaT/GIBX2rspzPV4muq1lgpRAJfhbjgZGFhkpCwP1kUym/E9Jn67/lwpq0FT
-# mnIWDr/8oBtjRxlgh6r0YmmWZcp29dl27EXQpgn3gh1pKDcENNd5/I3iCosAeGV7
-# 70TF/7OCXIb+gQc=
+# MRYEFOwbTLEqIwtMO0KKJxlBUTlngp73MA0GCSqGSIb3DQEBAQUABIIBAAlIZfbb
+# sl9iwA9FpZKjFievwHX15cRWF613D9ZyM1/tngcVoqC1yqs7uOzbK53WK6H901hb
+# 6SXPArBtczAmQcrSwolca0LsLCX9gv6h4MlHW1MVtmjX9PcrtUfPMMeHH6VTIFQR
+# jcAkjn9fQvERigR+xUHrEm4RnpzIgYgHFaiVGP14Z83UrRvu8ST8o9JrnJFFxjZ1
+# V/sQFhCboN1uBdzV14mXxi9Y4YeeExihXmnEeirzoicnpYp2PkQ9QcS8zzXgfTO8
+# AEzOrC+FR0ogPKUutvFWOgb9Tw02FpYP4bHOo/CagABl2FKnFjjiwxk3Dm5JjcAF
+# 5nOD/m8RV5G/Ecc=
 # SIG # End signature block
