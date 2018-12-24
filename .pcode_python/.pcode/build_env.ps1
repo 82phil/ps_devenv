@@ -5,8 +5,7 @@ Param(
     [string]$pythonVersion
 )
 
-# Builds a virtual enviornment
-# Also would be cool if an argument could be added for py2,py3 for code_python command
+# Returns Python Cores that are present in the Windows Registry
 function PythonRegistry {
     $install_paths = @(
         "hklm:\software\python\pythoncore\",
@@ -27,8 +26,7 @@ function PythonRegistry {
                         }
                     } else {
                         if (Test-Path -path (Join-Path $py_core."(default)" -ChildPath "python.exe")) {
-                            # Python 2 is more complicated, if virtualenv has not been run
-                            # then the default value contains the Path that the Python exe resides
+                            # Python 2 default value contains the Path that the Python exe resides
                             $py_exe_path = Join-Path $py_core."(default)" -ChildPath "python.exe"
                         }
                     }
@@ -39,6 +37,27 @@ function PythonRegistry {
     } 
     return $python_cores
 }
+
+# Returns Python Cores that are Windows AppX Packages
+function PythonAppx{
+    $python_cores = @{}
+    foreach ($python_appx in (Get-AppxPackage | Where-Object -Property "Name" -Like "*Python*")) {
+        if (Test-Path -path (Join-Path $python_appx.InstallLocation -ChildPath "python.exe")) {
+            $py_exe_path = Join-Path $python_appx.InstallLocation -ChildPath "python.exe"
+            $full_version = $python_appx.version.Split(".")
+            $short_ver = "$($full_version[0]).$($full_version[1])"
+            if ($python_appx.Architecture -Eq "X64") {
+                $python_cores += @{$short_ver=$py_exe_path}
+            }
+            if ($python_appx.Architecture -Eq "X32") {
+                $short_ver = "$($short_ver)-32"
+                $python_cores += @{$short_ver=$py_exe_path}
+            }
+        }
+    }
+    return $python_cores
+}
+
 
 function dispMenu {
     param($python_cores)
@@ -59,6 +78,7 @@ function dispMenu {
 }
 
 $python_cores = PythonRegistry
+$python_cores += PythonAppx
 if ($python_cores.Count -lt 1) {
     throw "Could not find a Python Installation!"
 }
@@ -95,12 +115,11 @@ if ($py_ver -like "2.*") {
 Write-Output "Installing PIP packages listed in requirements"
 & pip install -r .\requirements.txt
 Write-Output "Virtual Env up"
-
 # SIG # Begin signature block
 # MIIGlwYJKoZIhvcNAQcCoIIGiDCCBoQCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUn5gGhPwZzH57QKPdU9c8HtOM
-# /5WgggPOMIIDyjCCArKgAwIBAgIQTP3uDUHglaREeCKNEB56ujANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU2QWGnAbDh3Ct7lbuHxaDDejx
+# tnCgggPOMIIDyjCCArKgAwIBAgIQTP3uDUHglaREeCKNEB56ujANBgkqhkiG9w0B
 # AQUFADB9MSwwKgYDVQQLDCNodHRwczovL2dpdGh1Yi5jb20vODJwaGlsL3BzX2Rl
 # dmVudjEgMB4GCSqGSIb3DQEJARYRODIucGhpbEBnbWFpbC5jb20xFzAVBgNVBAoM
 # DlBoaWxpcCBIb2ZmbWFuMRIwEAYDVQQDDAlwc19kZXZlbnYwHhcNMTgxMDI5MDQy
@@ -126,11 +145,11 @@ Write-Output "Virtual Env up"
 # EAYDVQQDDAlwc19kZXZlbnYCEEz97g1B4JWkRHgijRAeerowCQYFKw4DAhoFAKB4
 # MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQB
 # gjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkE
-# MRYEFLaUnYdMpgTTrTpappSp6BjEoBnHMA0GCSqGSIb3DQEBAQUABIIBAANY2FE8
-# D/H9N9Y4EmkuABg7GlNtAX/oVvq/j6rbJPCcRL1SYtszQbwgJdowwowBcWMt+HME
-# TdTxPXgvFTMMltuzRB5o2qmLd0zzsa8JgOfNbstoN+kRyXRLIiZH2Fc6zNy93Pxb
-# WE1pp6DQJ7qaTMFk41P/JYiSiOrZcUbGDEFLK1x7LT0lCnjY/VvsIzizO+KyW3Go
-# lQk3S3Vp1O5mBIctPlL0SXP+Z2hqtVB5JIFsdtlMTg+OvhUdm4cjOwFV3H4MbkG7
-# tmU43jU0uCDFWMOJL+ik3UvkNRgjd27+LfaHSgnsMyzzAkErr69sOUMzLXjbBAd4
-# VQTIvlX3JAcrxLs=
+# MRYEFCo4yc8fTUPHo02TtBeLW/DxZE0+MA0GCSqGSIb3DQEBAQUABIIBAKhGyDq8
+# WoA3pAiMlXoeQuK1JzHe2OnYYLdF2fo18hmT6CBHtQVnmlnDcbo88CxoqlrU+RXW
+# D/KD1tHvXIR69F4OGTt9CLJ5WtBKj0zprg8veNkur9Ri1RE/o5kCrrwte0zZbhB+
+# gyKmtpQ8GaVIutetOiOpHPl/Ioq4y+SNrL8Qtgl6FD0MAazdDAD5tKGHt9Nfvg3/
+# rDZheQivLtZuJv1zLqDs44/ElFnstLyHk/JgH/RI0pa3c5LznCGn7STSnf3AnpLg
+# Y9fe69h5UJSKsm3llM0u7eQUeYyXxPLlS2H6SaBsLMJDRdhJUI+3RH5fMLyvy5Qh
+# WPGB7GQpmpw7Ncw=
 # SIG # End signature block
