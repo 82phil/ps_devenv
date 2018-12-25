@@ -1,10 +1,10 @@
 
 function New-Code {
-    . "build_env.ps1"
+    . (Path-Join $PSScriptRoot -ChildPath build_env.ps1)
 }
 
 function Reset-Code {
-    . "clean_env.ps1"
+    . (Path-Join $PSScriptRoot -ChildPath clean_env.ps1)
 }
 
 # Virtualenv Activate
@@ -16,11 +16,12 @@ function Reset-Code {
         & $virtualenv_script
     }
 }
+
 # SIG # Begin signature block
 # MIIGlwYJKoZIhvcNAQcCoIIGiDCCBoQCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU+rQlQ88wxC+gfNOpUCC9HuMR
-# Hs+gggPOMIIDyjCCArKgAwIBAgIQTP3uDUHglaREeCKNEB56ujANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUyOfT5kTkoXuL2gxEA45XYZhu
+# qR+gggPOMIIDyjCCArKgAwIBAgIQTP3uDUHglaREeCKNEB56ujANBgkqhkiG9w0B
 # AQUFADB9MSwwKgYDVQQLDCNodHRwczovL2dpdGh1Yi5jb20vODJwaGlsL3BzX2Rl
 # dmVudjEgMB4GCSqGSIb3DQEJARYRODIucGhpbEBnbWFpbC5jb20xFzAVBgNVBAoM
 # DlBoaWxpcCBIb2ZmbWFuMRIwEAYDVQQDDAlwc19kZXZlbnYwHhcNMTgxMDI5MDQy
@@ -46,11 +47,11 @@ function Reset-Code {
 # EAYDVQQDDAlwc19kZXZlbnYCEEz97g1B4JWkRHgijRAeerowCQYFKw4DAhoFAKB4
 # MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQB
 # gjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkE
-# MRYEFIk01Jj9SyyQ51wVjnDR7F/TlIagMA0GCSqGSIb3DQEBAQUABIIBALVjsfEO
-# MTc++8tGIOFajV0TsQG8ybVCfA3BrvgR6yxz9wFm30ZpLB/jsbHB+BE1X4wpXeZA
-# N7JXgUH+B0+3aOO+se7QO1Jp2mM9eAkyLRvPo3DMy9yRchU+1t/ZOuaDEEvM3VDk
-# Uazcr2rhXVxhVvOkbplGK7OnB7bCqZVuV4B0yBr1CfEEeKeMm9w+/MetkwYFXBvo
-# c+v2U0T1QcBAxG5Mw3VG/qcpdUfThbHvAjQiDDKhIs7dNhNEo5NShptDVkJA//vs
-# OsSEzZKLsjZSOuIHY3YzsSMGFWYY0nHrcp8W6LKEuGLwfdVab72jZB6mwHXKe2sp
-# Vbf2AgBmEALtTE8=
+# MRYEFD50zyI6Vud9hqFTsFHBFl1Ymky2MA0GCSqGSIb3DQEBAQUABIIBADsVBBDc
+# H3ay1gvJVkgrUYeDmKO9DJ1e6gZWXHKPJHqwnAH5v2x3qA8tZDj00RCki6JSI1FB
+# 6UpA90SlER+AgN506Me+fQSivlA8seDXjn1tDHVClCvJbVcjX8QKGHFy4Nkn2aDt
+# GtjgoLK/6Xyu3wciJ46dwiBpxhdE9GUbh4jqXUhgdSYRf7w0czeXQXCQNNa+ogoH
+# toBV9uNdtHv8Xr3a9TuuI52Wu/BLxRGZYowsCQNI2PY4dT+KxPOATTLXvArJj2K4
+# j3WRmy7Ph6w+YLg7EIgO7ynZKsf29fBP3TsvY5NgGRVKoQ+ik+GxSPOjybn30IzD
+# bxhv2Yb69ipdmXA=
 # SIG # End signature block

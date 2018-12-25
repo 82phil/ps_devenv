@@ -8,20 +8,23 @@ param(
     }
 }
 
-
-# .pcode autorun script if available
-$project_dir = if (Test-Path env:PWD) {$env:PWD} else {Get-Location}
-$pcode_autorun = [io.path]::Combine($project_dir, ".pcode", "autorun.ps1")
-if ([System.IO.File]::Exists($pcode_autorun)) {
-    Import-Module $pcode_autorun
+function Enter-Code {
+    # .pcode autorun script if available
+    $project_dir = if (Test-Path env:PWD) {$env:PWD} else {Get-Location}
+    $pcode_autorun = [io.path]::Combine($project_dir, ".pcode", "autorun.ps1")
+    if ([System.IO.File]::Exists($pcode_autorun)) {
+        . $pcode_autorun
+    }
 }
 
-Export-ModuleMember -Function New-Code
+
+
+
 # SIG # Begin signature block
 # MIIGlwYJKoZIhvcNAQcCoIIGiDCCBoQCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUBgHlGJGAdRqt+LEaLajEHRNj
-# IPmgggPOMIIDyjCCArKgAwIBAgIQTP3uDUHglaREeCKNEB56ujANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUfxXosMavigfwpwCz22b5uu5I
+# qO+gggPOMIIDyjCCArKgAwIBAgIQTP3uDUHglaREeCKNEB56ujANBgkqhkiG9w0B
 # AQUFADB9MSwwKgYDVQQLDCNodHRwczovL2dpdGh1Yi5jb20vODJwaGlsL3BzX2Rl
 # dmVudjEgMB4GCSqGSIb3DQEJARYRODIucGhpbEBnbWFpbC5jb20xFzAVBgNVBAoM
 # DlBoaWxpcCBIb2ZmbWFuMRIwEAYDVQQDDAlwc19kZXZlbnYwHhcNMTgxMDI5MDQy
@@ -47,11 +50,11 @@ Export-ModuleMember -Function New-Code
 # EAYDVQQDDAlwc19kZXZlbnYCEEz97g1B4JWkRHgijRAeerowCQYFKw4DAhoFAKB4
 # MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQB
 # gjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkE
-# MRYEFGuWMUkmXqDmu0MMCz2D9GpznhnpMA0GCSqGSIb3DQEBAQUABIIBAIGcRoY7
-# NWPwNngS9AR8Ofv3EnTo8EaHklT6JLIFKwcCzwzkgppGm3Obh5T6bi+t+Vg2OgR8
-# 0CIcePcGukwcGpO/OGN1CfCAgh9Dqd3ncPENu010pEvpLHYpkaJ1sb8Npx3EdKpz
-# cIVz4kKJG7iwvB6Mh0Nke1uwva+RQubCnPPTUSp0ioJPh6EDPckRHAULK2GSHuGN
-# GS8gfjoVVw+54Ac9StkPoFXFOIfL3fN2o6tpxmhvNAQXhOm/Lkvv3T6myR9kibXq
-# +L0lLxaDtqOxDOQYap2MJ/4bJWKT7slv3nkhoe/+D7KbDlVAUcRmC57eFFwQlpkh
-# tEbV2R40GgYZ/yM=
+# MRYEFGABKtIH5DLUafYfzfjGr7PGVV64MA0GCSqGSIb3DQEBAQUABIIBAHFz1WgP
+# 2M8Hx/rGuVwundq69F9KVY/D229v3fCoXQ6P0WmZ/WtPfa0Hq1xMeMniA4d20LbR
+# M84eM+3zWbVrA6K19g2cVChBhCKU3x+2PzbB+Zzb1cXO5vzlK15hbg5SDFcFZmSY
+# 59SJa1gyizcjQiAidyY13mYheArxq3S0z0R+zedPsWVmYoEPiD2+39t+bZq1hL5G
+# KSZfO1qYFAJQoq8rDihAjmSZTgRiZPB5Jk9lNeHM4UxX7zmaeflmCe9D2jq0E1WS
+# rCTJaSK3N9oLkGQwlSZ6Co9tAg5mFwhqp/5jZ3nZDOLhUw3XSHp6I2KJBqi20C2D
+# HWT6EX12tBOk1AU=
 # SIG # End signature block
