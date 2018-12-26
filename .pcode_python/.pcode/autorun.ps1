@@ -1,11 +1,17 @@
-
-function New-Code {
-    . (Path-Join $PSScriptRoot -ChildPath build_env.ps1)
+function code_alias{
+    Param([string] $alias_name, [string] $script)
+    $project_dir = if (Test-Path env:PWD) {$env:PWD} else {Get-Location}
+    $script_path = [io.path]::Combine($project_dir, ".pcode", $script)
+    if ([System.IO.File]::Exists($script_path)) {
+        New-Alias $alias_name $script_path -Scope global -Force
+    }
+    Write-Output "Python workspace alias $alias_name added"
 }
 
-function Reset-Code {
-    . (Path-Join $PSScriptRoot -ChildPath clean_env.ps1)
-}
+# Workspace Aliases
+
+code_alias -alias_name "build" -script "build_env.ps1"
+code_alias -alias_name "clean" -script "clean_env.ps1"
 
 # Virtualenv Activate
 & {
@@ -20,8 +26,8 @@ function Reset-Code {
 # SIG # Begin signature block
 # MIIGlwYJKoZIhvcNAQcCoIIGiDCCBoQCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUyOfT5kTkoXuL2gxEA45XYZhu
-# qR+gggPOMIIDyjCCArKgAwIBAgIQTP3uDUHglaREeCKNEB56ujANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUC12cPp97mPAGJhR2vJ5cYFAD
+# oSGgggPOMIIDyjCCArKgAwIBAgIQTP3uDUHglaREeCKNEB56ujANBgkqhkiG9w0B
 # AQUFADB9MSwwKgYDVQQLDCNodHRwczovL2dpdGh1Yi5jb20vODJwaGlsL3BzX2Rl
 # dmVudjEgMB4GCSqGSIb3DQEJARYRODIucGhpbEBnbWFpbC5jb20xFzAVBgNVBAoM
 # DlBoaWxpcCBIb2ZmbWFuMRIwEAYDVQQDDAlwc19kZXZlbnYwHhcNMTgxMDI5MDQy
@@ -47,11 +53,11 @@ function Reset-Code {
 # EAYDVQQDDAlwc19kZXZlbnYCEEz97g1B4JWkRHgijRAeerowCQYFKw4DAhoFAKB4
 # MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQB
 # gjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkE
-# MRYEFD50zyI6Vud9hqFTsFHBFl1Ymky2MA0GCSqGSIb3DQEBAQUABIIBADsVBBDc
-# H3ay1gvJVkgrUYeDmKO9DJ1e6gZWXHKPJHqwnAH5v2x3qA8tZDj00RCki6JSI1FB
-# 6UpA90SlER+AgN506Me+fQSivlA8seDXjn1tDHVClCvJbVcjX8QKGHFy4Nkn2aDt
-# GtjgoLK/6Xyu3wciJ46dwiBpxhdE9GUbh4jqXUhgdSYRf7w0czeXQXCQNNa+ogoH
-# toBV9uNdtHv8Xr3a9TuuI52Wu/BLxRGZYowsCQNI2PY4dT+KxPOATTLXvArJj2K4
-# j3WRmy7Ph6w+YLg7EIgO7ynZKsf29fBP3TsvY5NgGRVKoQ+ik+GxSPOjybn30IzD
-# bxhv2Yb69ipdmXA=
+# MRYEFDUZT9KzAy8ymX0KoU2c8Yz1pIrxMA0GCSqGSIb3DQEBAQUABIIBAE8ul6sD
+# atDTa4bXE2W/IukvdaCLiCGt2XJNBieJzr20uRJZA0ASIiqr5EabaxK4IQQZbZ0a
+# Lkv/78MrnUFOE4t5wsFK1RWRUkuisJ1tJDzYyAp9zbnBGUp9D20czSj8m3CYuPXq
+# zb6NE3zSOHKlOI+1mdx8P24HHCdlUFiHNNMF9VdJ3sw7gCZhcD8COm2NIMNdMtTI
+# HYHg76gs7E7q4TjhflM5F/UDnjwuozvExNqd7sYAjyQVr4Co1RPIGMri7gSxPdAP
+# wU259u9EXmZlVacxivNSDt9uLHFD+Gsrc1T9lpaygTZYH6l7+TdOTEj2kOb6eAl8
+# i7twNh10E0XQKtY=
 # SIG # End signature block

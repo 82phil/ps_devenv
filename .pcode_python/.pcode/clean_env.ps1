@@ -4,12 +4,14 @@ if (Test-Path env:PWD) {
 }
 & pip freeze | ForEach-Object {pip uninstall -y $_}
 & pip install -r .\requirements.txt
-Write-Output "Sucessfully cleaned environment!"
+Write-Output "Sucessfully cleaned environment"
+
+
 # SIG # Begin signature block
 # MIIGlwYJKoZIhvcNAQcCoIIGiDCCBoQCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUmoR7sTPWg6uvK8rqDTByXquF
-# exSgggPOMIIDyjCCArKgAwIBAgIQTP3uDUHglaREeCKNEB56ujANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUVBKCTESpbawqjeNZJnWhl4Qn
+# 44CgggPOMIIDyjCCArKgAwIBAgIQTP3uDUHglaREeCKNEB56ujANBgkqhkiG9w0B
 # AQUFADB9MSwwKgYDVQQLDCNodHRwczovL2dpdGh1Yi5jb20vODJwaGlsL3BzX2Rl
 # dmVudjEgMB4GCSqGSIb3DQEJARYRODIucGhpbEBnbWFpbC5jb20xFzAVBgNVBAoM
 # DlBoaWxpcCBIb2ZmbWFuMRIwEAYDVQQDDAlwc19kZXZlbnYwHhcNMTgxMDI5MDQy
@@ -35,11 +37,11 @@ Write-Output "Sucessfully cleaned environment!"
 # EAYDVQQDDAlwc19kZXZlbnYCEEz97g1B4JWkRHgijRAeerowCQYFKw4DAhoFAKB4
 # MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQB
 # gjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkE
-# MRYEFKDXDnjChl3wQ1lLPTnck55O0NxzMA0GCSqGSIb3DQEBAQUABIIBAFN28A+U
-# IB9KKTB6pTxYVQkV7U2go1mzHkC1JVlOPHSsWGEG3sJ/mte4CmUAfiybZEul/aHI
-# rrwExguOBfXO4w6GEylFzfDW1bKNjtSg+fJXL/R7ZUfk6qB0QZKqIyXYWJiS7gDn
-# Rus/s+OkVfdpaIPe8tnFJ8c+rqS8lVH0U36wv5jfkNEX/3+ArO4MvuTZWXk95s/S
-# IGoVE/ZgMUqmYTMedyO+G08gsNOuz3yDYX/C+KRpCAIBl/QUECYieB513gYolt2u
-# GrioV+88b9kgTbsG/wBFJqrSBti/9/FCoNaHgTPCoY0Km+l+vucxdaDjk0ldaN13
-# qqeZzqOmKtVd/GQ=
+# MRYEFAZZRMiVi6sp9SOyE3lu5/ur7uOwMA0GCSqGSIb3DQEBAQUABIIBAEiO9u/f
+# midCrsTf/BA4Hli8ufh/z9MqkycMpfsd8qcXNiBi4M1gTxmRrgrk+n8pAohf6DkY
+# Y10duKjZ+3DRMPMUxTj/zUWQVa6p/XUS5lz23OljJSLwOa9WBiU2rIosBqkIXbwu
+# 1oEEWYIrmb8p2O65PIcpLQEAlu9Vw8afGKHw1pbwZZJAI8apWEiWxGUwJi0QBrN4
+# mvQh60i0tIP5TamBi+A1G8BZdsG+H/OokeWXKfrNAynnaqkDnaAnT4M4sQPOuUQi
+# ki/N32RXzYUA2RzvnovNs4da65n9aR9ZOdZAAdL4xphNhKU0BRPF6g1maKYbNdyb
+# 5k2CNds26knxVYk=
 # SIG # End signature block

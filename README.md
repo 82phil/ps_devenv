@@ -11,7 +11,7 @@ and running pip commands to install packages this is meant to do it all in one
 command, like so:
 
 1. Clone down repository
-2. Launch Powershell and type `code_python`, grab a cup of coffee
+2. Launch Powershell and type `New-Code Python`, grab a cup of coffee
 
 ![code_python demonstration](./doc/code_python.gif)
 

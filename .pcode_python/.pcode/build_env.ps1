@@ -5,8 +5,7 @@ Param(
     [string]$pythonVersion
 )
 
-# Builds a virtual enviornment
-# Also would be cool if an argument could be added for py2,py3 for code_python command
+# Returns Python Cores that are present in the Windows Registry
 function PythonRegistry {
     $install_paths = @(
         "hklm:\software\python\pythoncore\",
@@ -27,8 +26,7 @@ function PythonRegistry {
                         }
                     } else {
                         if (Test-Path -path (Join-Path $py_core."(default)" -ChildPath "python.exe")) {
-                            # Python 2 is more complicated, if virtualenv has not been run
-                            # then the default value contains the Path that the Python exe resides
+                            # Python 2 default value contains the Path that the Python exe resides
                             $py_exe_path = Join-Path $py_core."(default)" -ChildPath "python.exe"
                         }
                     }
@@ -39,6 +37,27 @@ function PythonRegistry {
     } 
     return $python_cores
 }
+
+# Returns Python Cores that are Windows AppX Packages
+function PythonAppx{
+    $python_cores = @{}
+    foreach ($python_appx in (Get-AppxPackage | Where-Object -Property "Name" -Like "*Python*")) {
+        if (Test-Path -path (Join-Path $python_appx.InstallLocation -ChildPath "python.exe")) {
+            $py_exe_path = Join-Path $python_appx.InstallLocation -ChildPath "python.exe"
+            $full_version = $python_appx.version.Split(".")
+            $short_ver = "$($full_version[0]).$($full_version[1])"
+            if ($python_appx.Architecture -Eq "X64") {
+                $python_cores += @{$short_ver=$py_exe_path}
+            }
+            if ($python_appx.Architecture -Eq "X32") {
+                $short_ver = "$($short_ver)-32"
+                $python_cores += @{$short_ver=$py_exe_path}
+            }
+        }
+    }
+    return $python_cores
+}
+
 
 function dispMenu {
     param($python_cores)
@@ -59,8 +78,10 @@ function dispMenu {
 }
 
 $python_cores = PythonRegistry
+$python_cores += PythonAppx
 if ($python_cores.Count -lt 1) {
     throw "Could not find a Python Installation!"
+    exit 1
 }
 if ($python_cores.contains($pythonVersion)) {
     $python_cores = @{$pythonVersion=$python_cores[$pythonVersion]}
@@ -82,24 +103,31 @@ if (Test-Path env:PWD) {
     Set-Location ..
     }
 }
-if ($py_ver -like "2.*") {
-    & $python -m virtualenv venv --no-site-packages
-} else {
-    & $python -m venv venv
-}
-# Python 2.7 venv
-# $python_venv venv --no-site-packages
-& .\venv\Scripts\activate.ps1
+try {
+    if ($py_ver -like "2.*") {
+        # Python 2.7 venv
+        & $python -m virtualenv venv --no-site-packages
+    } else {
+        & $python -m venv venv
+    }
 
+    # Run the activation script
+    & .\venv\Scripts\activate.ps1
+} catch {
+    throw
+    Write-Output "Failed to Create the Virtual Environment!"
+    exit 1
+}
 # Install requirements
 Write-Output "Installing PIP packages listed in requirements"
 & pip install -r .\requirements.txt
 Write-Output "Virtual Env up"
+
 # SIG # Begin signature block
 # MIIGlwYJKoZIhvcNAQcCoIIGiDCCBoQCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUhaKeuMXQU9aQisWPcWJ5XJig
-# cV6gggPOMIIDyjCCArKgAwIBAgIQTP3uDUHglaREeCKNEB56ujANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUAoqvFZ5UI70tFHJIQAkP1wt6
+# CvKgggPOMIIDyjCCArKgAwIBAgIQTP3uDUHglaREeCKNEB56ujANBgkqhkiG9w0B
 # AQUFADB9MSwwKgYDVQQLDCNodHRwczovL2dpdGh1Yi5jb20vODJwaGlsL3BzX2Rl
 # dmVudjEgMB4GCSqGSIb3DQEJARYRODIucGhpbEBnbWFpbC5jb20xFzAVBgNVBAoM
 # DlBoaWxpcCBIb2ZmbWFuMRIwEAYDVQQDDAlwc19kZXZlbnYwHhcNMTgxMDI5MDQy
@@ -125,11 +153,11 @@ Write-Output "Virtual Env up"
 # EAYDVQQDDAlwc19kZXZlbnYCEEz97g1B4JWkRHgijRAeerowCQYFKw4DAhoFAKB4
 # MBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQB
 # gjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkE
-# MRYEFKlu6jZjbwv4RFkHqyCYJYG8AimrMA0GCSqGSIb3DQEBAQUABIIBAEVX8QDS
-# FUgD4QvEgicA8AipSYrA/kdMk5eJXC0MPSsiV462dADty+rYei9JZW3CbLitwVox
-# SZxC/Wbu0jumbkokaX2kCjUFMUHNoko0kven7I7HrGrLTKOKDyhgSOLgFTyS+68y
-# JdoOlw4BNTN7z1KobtNvqa0AYci1fkxH5BNFtyay5T2lOVOOBubkL2Z6vdCCnYMS
-# q9zNWJcK4nhKGlWiP+S/okva3iCTOjI72+tHZJ4DNn3Yp2+2ehQH0VPgUvjLp9Xr
-# JozjQVkdI2F2+caNkOYKGiYWIvBvHEjBnjU9+3C8V58fOVTW0W9HxN4U1l5Jipco
-# AZZ2GCas//RqCTg=
+# MRYEFAX1jJsM7jWBQiIj3Wcx4yj6FpKlMA0GCSqGSIb3DQEBAQUABIIBAG5uw/YH
+# dXGaAVqRK28WpLKVlOR/ranDWihs6NKSElDbiX9mKHHxjM0WzhmLUzp6L/nz5c5L
+# vlTIXXIkgsFe9TWpGmgCKw03aS6f0SkH+kknZ9ulAihQpKG3oeM55/g4tprh8p4O
+# gFvo/H59jhiKydZm5z6rHtnA2dJ1mkSVVLRZQqwyOraRZ7moo+Qti1VSpL+XtTSX
+# bFrmpiPvwXeVkatkQ7CtQRpFOgcOi9G6qUVOwMaSxyPSlGzzxgjW2M72dXAWg96y
+# xc3gDpyZ0vJbKzOOY2OeK9OwbiB9zoqdgaoXGb5LUwFujCc5tvOcMOccqTvV4Jug
+# EMghWvlda4lXS0Y=
 # SIG # End signature block
