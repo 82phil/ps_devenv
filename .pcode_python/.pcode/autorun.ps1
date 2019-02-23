@@ -3,7 +3,7 @@ function code_alias{
     $project_dir = if (Test-Path env:PWD) {$env:PWD} else {Get-Location}
     $script_path = [io.path]::Combine($project_dir, ".pcode", $script)
     if ([System.IO.File]::Exists($script_path)) {
-        New-Alias $alias_name $script_path -Scope global
+        New-Alias $alias_name $script_path -Scope global -Force
     }
     Write-Output "Python workspace alias $alias_name added"
 }

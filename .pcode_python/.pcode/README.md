@@ -7,18 +7,22 @@ Scripts to setup and manage a Python environment
 At the root directory of the Python module (where requirements.txt is located) run the following command in PowerShell.
 
 ```powershell
-code_python
+New-Code Python
 ``` 
 
-This will copy the directories under `%userprofile%\Documents\WindowsPowerShell`
+This will copy the directories under the module directory `.pcode_python/`
 over to your current directory and run the build script.
 
 If multiple versions of Python are found, the script will ask to choose
 one. A version may also be passed in as an argument.
 
 ```powershell
-code_python 2.7
+New-Code Python 2.7
 ```
+
+# Existing Environment
+
+Run the command `Enter-Code` in your workspace directory.
 
 # Workspace Aliases
 

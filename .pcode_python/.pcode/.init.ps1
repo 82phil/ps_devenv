@@ -1,6 +1,4 @@
-$profile_dir = Split-Path -path $profile
-$pcode_python = Join-Path -Path $profile_dir .pcode_python
-$old_location = Get-Location
+$pcode_python = Join-Path -Path $PSScriptRoot ..
 
 # Copy stuff over...
 Write-Output "Copying Workspace..."

@@ -4,4 +4,4 @@ if (Test-Path env:PWD) {
 }
 & pip freeze | ForEach-Object {pip uninstall -y $_}
 & pip install -r .\requirements.txt
-Write-Output "Sucessfully cleaned environment!"
+Write-Output "Sucessfully cleaned environment"
