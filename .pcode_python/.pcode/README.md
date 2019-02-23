@@ -34,11 +34,15 @@ Python workspace alias clean added
 (venv) PS C:\git\CruSSH>
 ```
 
-## Build
+## build
 
 Runs the build script. This will setup the virtual environment and install
 pip packages listed in requirements.txt
 
-## Clean
+## clean
 
 Removes all pip packages and installs the packages listed in requirements.txt
+
+## idle
+
+Launches idle from the virtual environment
