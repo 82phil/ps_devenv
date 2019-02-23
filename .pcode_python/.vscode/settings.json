@@ -1,6 +1,7 @@
 {
     "python.pythonPath": "venv\\Scripts\\python.exe",
-     "python.linting.pylintArgs": [
+    "python.terminal.activateEnvironment": false,
+    "python.linting.pylintArgs": [
         "--extension-pkg-whitelist=wx"
     ],
     "terminal.integrated.env.windows": {

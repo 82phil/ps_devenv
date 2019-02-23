@@ -12,6 +12,7 @@ function code_alias{
 
 code_alias -alias_name "build" -script "build_env.ps1"
 code_alias -alias_name "clean" -script "clean_env.ps1"
+code_alias -alias_name "idle" -script "idle.ps1"
 
 # Virtualenv Activate
 & {
