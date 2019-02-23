@@ -18,19 +18,18 @@ function PythonRegistry {
                 $exe_regpath = Join-Path $core.PSPath -ChildPath "InstallPath"
                 if (test-path -path $exe_regpath) {
                     $py_core = Get-ItemProperty -Path $exe_regpath
-                    $py_exe_path = "" 
                     if ($py_core.PSObject.properties.name -contains "ExecutablePath") {
                         if (Test-Path -path $py_core.ExecutablePath) {
                             # Python 3 provides ExecutablePath value that points to Python exe
-                            $py_exe_path = $py_core.ExecutablePath
-                        }
+                            $python_cores += @{$core.PSChildName=$py_core.ExecutablePath}
+                        } 
                     } else {
                         if (Test-Path -path (Join-Path $py_core."(default)" -ChildPath "python.exe")) {
                             # Python 2 default value contains the Path that the Python exe resides
                             $py_exe_path = Join-Path $py_core."(default)" -ChildPath "python.exe"
-                        }
+                            $python_cores += @{$core.PSChildName=$py_exe_path}
+                        } 
                     }
-                    $python_cores += @{$core.PSChildName=$py_exe_path}
                 }
             }
         }    
