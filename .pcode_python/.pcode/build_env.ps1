@@ -119,5 +119,5 @@ try {
 }
 # Install requirements
 Write-Output "Installing PIP packages listed in requirements"
-& pip install -r .\requirements.txt
+& python -m pip install -r .\requirements.txt
 Write-Output "Virtual Env up"
