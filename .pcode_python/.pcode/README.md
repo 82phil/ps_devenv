@@ -46,3 +46,7 @@ Removes all pip packages and installs the packages listed in requirements.txt
 ## idle
 
 Launches idle from the virtual environment
+
+## lint
+
+Runs pylint across all Python (*.py) files in the current directory.
