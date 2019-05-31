@@ -43,6 +43,12 @@ pip packages listed in requirements.txt
 
 Removes all pip packages and installs the packages listed in requirements.txt
 
+Another file may be specified as an argument to use as a requirements file.
+
+```powershell
+clean dev_requirements.txt
+```
+
 ## idle
 
 Launches idle from the virtual environment
