@@ -52,3 +52,7 @@ clean dev_requirements.txt
 ## idle
 
 Launches idle from the virtual environment
+
+## lint
+
+Runs pylint across all Python (*.py) files in the current directory.
