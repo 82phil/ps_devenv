@@ -2,7 +2,7 @@
 Param(
     # Specify the specific Python Version to use
     [Parameter(Mandatory=$False,Position=1)]
-    [string]$pythonVersion
+    [string]$desiredVersion
 )
 
 # Returns Python Cores that are present in the Windows Registry
@@ -11,7 +11,7 @@ function PythonRegistry {
         "hklm:\software\python\pythoncore\",
         "hkcu:\software\python\pythoncore\",
         "hklm:\software\wow6432node\python\pythoncore\")
-    $python_cores = @{}
+    $python_cores = @()
     foreach ($path in $install_paths) {
         if (test-path -path $path) {
             foreach ($core in Get-ChildItem -path $path) {
@@ -21,13 +21,13 @@ function PythonRegistry {
                     if ($py_core.PSObject.properties.name -contains "ExecutablePath") {
                         if (Test-Path -path $py_core.ExecutablePath) {
                             # Python 3 provides ExecutablePath value that points to Python exe
-                            $python_cores += @{$core.PSChildName=$py_core.ExecutablePath}
+                            $python_cores += $py_core.ExecutablePath
                         } 
                     } else {
                         if (Test-Path -path (Join-Path $py_core."(default)" -ChildPath "python.exe")) {
                             # Python 2 default value contains the Path that the Python exe resides
                             $py_exe_path = Join-Path $py_core."(default)" -ChildPath "python.exe"
-                            $python_cores += @{$core.PSChildName=$py_exe_path}
+                            $python_cores += $py_exe_path
                         } 
                     }
                 }
@@ -39,32 +39,45 @@ function PythonRegistry {
 
 # Returns Python Cores that are Windows AppX Packages
 function PythonAppx{
-    $python_cores = @{}
+    $python_cores = @()
     foreach ($python_appx in (Get-AppxPackage | Where-Object -Property "Name" -Like "*Python*")) {
-        if (Test-Path -path (Join-Path $python_appx.InstallLocation -ChildPath "python.exe")) {
-            $py_exe_path = Join-Path $python_appx.InstallLocation -ChildPath "python.exe"
-            $full_version = $python_appx.version.Split(".")
-            $short_ver = "$($full_version[0]).$($full_version[1])"
-            if ($python_appx.Architecture -Eq "X64") {
-                $python_cores += @{$short_ver=$py_exe_path}
-            }
-            if ($python_appx.Architecture -Eq "X32") {
-                $short_ver = "$($short_ver)-32"
-                $python_cores += @{$short_ver=$py_exe_path}
-            }
+        # Local AppData for Windows Appx should contain valid links
+        $py_folder = [IO.Path]::Combine(
+            $env:LOCALAPPDATA, "Microsoft", "WindowsApps", $python_appx.PackageFamilyName)
+        if (Test-Path -path (Join-Path $py_folder -ChildPath "python.exe")) {
+            $py_exe_path = Join-Path $py_folder -ChildPath "python.exe"
+            $python_cores += $py_exe_path
         }
     }
     return $python_cores
 }
 
+# TODO: Add one more to just go through the paths var and look for python.exe
+
+# Runs python.exe with info.py script to extract information
+function PythonInfo($python_paths) {
+    $py_info = @()
+    foreach ($python in $python_paths) {
+        try {
+            $info = & $python (Join-Path (Split-Path -Parent $PSCommandPath) -ChildPath info.py) | ConvertFrom-Json
+            $info | Add-Member NoteProperty "FullPath" $python
+            $py_info += $info
+        } catch {
+
+        }
+    } 
+    return $py_info
+}
 
 function dispMenu {
-    param($python_cores)
+    param($py_installs)
     Write-Host "========== Choose Python Version to use =========="
     $entry = @()
-    foreach ($core in $python_cores.Keys) {
-        $entry += $core
-        Write-Host "$($entry.count):  $core"
+    foreach ($install in $py_installs) {
+        $entry += $install
+        $is64 = If ($install.is64Bit -eq "True") {"64-bit"} else {"32-bit"}
+        Write-Host (
+            "$($entry.count):  Python {0}.{1}.{2} {3} {4}" -f  $($install.versionInfo + $is64))
     }
     while ($True) {
         $selection = Read-Host "Make a selection"
@@ -78,19 +91,23 @@ function dispMenu {
 
 $python_cores = PythonRegistry
 $python_cores += PythonAppx
-if ($python_cores.Count -lt 1) {
-    throw "Could not find a Python Installation!"
+$py_installs = PythonInfo($python_cores) | Sort-Object -Property versionInfo
+
+if ($desiredVersion) {
+    $py_installs = @($py_installs | Where-Object { $_.versionInfo[0..2] -Join "." -Match $desiredVersion})
+}
+if ($py_installs.Count -lt 1) {
+    if ($desiredVersion) {
+        throw "Could not find a Python Installation matching version {0}" -f $desiredVersion
+    } else {
+        throw "Could not find a Python Installation!"
+    }
     exit 1
 }
-if (($pythonVersion) -and ($python_cores.contains($pythonVersion))) {
-    $python_cores = @{$pythonVersion=$python_cores[$pythonVersion]}
-}
-if ($python_cores.count -gt 1) {
-    $py_ver = (dispMenu($python_cores))
-    $python = $python_cores[$py_ver]
+if ($py_installs.count -gt 1) {
+    $python = (dispMenu($py_installs))
 } else {
-    $py_ver = $python_cores.Keys
-    $python = $python_cores[$py_ver]
+    $python = $py_installs[0]
 }
 # Start building the env
 Write-Output "Building Virtual Environment..."
@@ -103,11 +120,16 @@ if (Test-Path env:PWD) {
     }
 }
 try {
-    if ($py_ver -like "2.*") {
-        # Python 2.7 venv
-        & $python -m virtualenv venv --no-site-packages
+    if ($python.versionInfo[0] -eq "2") {
+        # Python 2.7 virtualenv
+        & $python.FullPath -m virtualenv venv --no-site-packages
     } else {
-        & $python -m venv venv
+        # Python 3 comes with venv, but desire to use virtualenv if available
+        & $python.FullPath -m virtualenv venv --no-site-packages
+        if (-not $?) {
+            Write-Output "Using Built-in venv instead..."
+            & $python.FullPath -m venv venv
+        }
     }
 
     # Run the activation script
