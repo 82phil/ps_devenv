@@ -91,7 +91,7 @@ function dispMenu {
 
 $python_cores = PythonRegistry
 $python_cores += PythonAppx
-$py_installs = PythonInfo($python_cores) | Sort-Object -Property versionInfo
+$py_installs = @(PythonInfo($python_cores) | Sort-Object -Property versionInfo)
 
 if ($desiredVersion) {
     $py_installs = @($py_installs | Where-Object { $_.versionInfo[0..2] -Join "." -Match $desiredVersion})
