@@ -26,8 +26,11 @@ installing packages via pip. A moment or two later everything should be ready.
 
 ## Module installation
 
-The PowerShell module can be installed either at a location where it can
-be auto-imported (`$env:PSmodulePath`) or imported manually from any location.
+This module is available from the PowerShell Gallery, perform the following:
+
+```
+Install-Module ps_devenv
+```
 
 ## Adding to your existing PowerShell Profile
 
