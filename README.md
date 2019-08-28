@@ -1,3 +1,5 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/h61aascy7dkp4u1l?svg=true)](https://ci.appveyor.com/project/82phil/ps-devenv)
+
 # Introduction
 
 Provides PowerShell aliases to automated the setup of a development environment.
