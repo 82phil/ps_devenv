@@ -2,9 +2,6 @@ environment:
   NuGetApiKey:
     secure: nF4B4jL7dU+8f+XOz2XaAAutBszFnIOwotaF7EqXoDYYVJqh2GGheDkrshA8TjPL
 
-init:
-  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-
 # Allow WMF5 (i.e. PowerShellGallery functionality)
 os: WMF 5
 
@@ -17,3 +14,7 @@ build: false
 
 test_script:
   - ps: . .\build.ps1
+
+on_finish:
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
