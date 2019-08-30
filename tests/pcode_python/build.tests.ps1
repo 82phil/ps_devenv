@@ -1,8 +1,15 @@
 if (-not $PSScriptRoot) { $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent }
 
-$root = "$PSScriptRoot\..\..\.pcode_python\.pcode\build_env.ps1"
+if (-not $ENV:BHModulePath) {
+    $module_path = [IO.Path]::Combine($PSScriptRoot, "..", "..", "devenv")
+} else {
+    $module_path = $ENV:BHModulePath
+}
 
-Import-Module $root
+$pcode_module =  [IO.Path]::Combine(".pcode_python", ".pcode", "build_env.ps1")
+$module_under_test = Join-Path $module_path $pcode_module
+
+Import-Module $module_under_test
 
 Describe "Python Installations using the Registry" {
 
