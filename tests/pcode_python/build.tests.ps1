@@ -1,7 +1,13 @@
 if (-not $PSScriptRoot) { $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent }
 
+if (-not $ENV:BHModulePath) {
+    $module_path = [IO.Path]::Combine($PSScriptRoot, "..", "..", "devenv")
+} else {
+    $module_path = $ENV:BHModulePath
+}
+
 $pcode_module =  [IO.Path]::Combine(".pcode_python", ".pcode", "build_env.ps1")
-$module_under_test = Join-Path $ENV:BHModulePath $pcode_module
+$module_under_test = Join-Path $module_path $pcode_module
 
 Import-Module $module_under_test
 
