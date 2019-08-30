@@ -1,7 +1,7 @@
 if (-not $PSScriptRoot) { $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent }
 
 if (-not $ENV:BHModulePath) {
-    $module_path = [IO.Path]::Combine($PSScriptRoot, "..", "..", "devenv")
+    $module_path = [IO.Path]::Combine($PSScriptRoot, "..", "..", "DevEnv")
 } else {
     $module_path = $ENV:BHModulePath
 }
