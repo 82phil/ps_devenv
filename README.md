@@ -20,7 +20,7 @@ command, like so:
 The script automates the workflow of creating the Python virtualenv and
 installing packages via pip. A moment or two later everything should be ready.
 
-[More Information](./devenv/.pcode_python/.pcode/README.md)
+[More Information](./DevEnv/.pcode_python/.pcode/README.md)
 
 # Installation 
 
@@ -29,7 +29,7 @@ installing packages via pip. A moment or two later everything should be ready.
 This module is available from the PowerShell Gallery, perform the following:
 
 ```
-Install-Module devenv
+Install-Module DevEnv -Scope CurrentUser
 ```
 
 ## Adding to your existing PowerShell Profile
