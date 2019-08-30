@@ -2,7 +2,7 @@
 
 # Introduction
 
-Provides PowerShell aliases to automated the setup of a development environment.
+Provides PowerShell functions to automate the setup of a development environment.
 The examples provided are tuned to my workflow but hopefully
 provide enough to allow you to implement your own. 
 
@@ -20,7 +20,7 @@ command, like so:
 The script automates the workflow of creating the Python virtualenv and
 installing packages via pip. A moment or two later everything should be ready.
 
-[More Information](./.pcode_python/.pcode/README.md)
+[More Information](./devenv/.pcode_python/.pcode/README.md)
 
 # Installation 
 
@@ -29,7 +29,7 @@ installing packages via pip. A moment or two later everything should be ready.
 This module is available from the PowerShell Gallery, perform the following:
 
 ```
-Install-Module ps_devenv
+Install-Module devenv
 ```
 
 ## Adding to your existing PowerShell Profile
