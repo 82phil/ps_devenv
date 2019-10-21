@@ -84,7 +84,9 @@ function dispMenu {
         $selection = Read-Host "Make a selection"
         if ($selection -match "\d+") {
             $selection = [int]$selection - 1
-            return $entry[$selection]
+            if ($selection -lt $py_installs.Count -and $selection -ge 0) {
+                return $entry[$selection]
+            }
         }
     }
 }
