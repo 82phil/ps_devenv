@@ -1,6 +1,6 @@
 # Introduction
 
-Scripts to setup and manage a Python environment
+Scripts to setup and manage a Python virtual environment
 
 # Setup Python Environment
 
@@ -10,11 +10,11 @@ At the root directory of the Python module (where requirements.txt is located) r
 New-Code Python
 ``` 
 
-This will copy the directories under the module directory `.pcode_python/`
+This will copy the directories under the DevEnv module directory `.pcode_python/`
 over to your current directory and run the build script.
 
-If multiple versions of Python are found, the script will ask to choose
-one. A version may also be passed in as an argument.
+If multiple versions of Python are found, the script will provide a selection
+to choose from. A version may also be passed in as an argument.
 
 ```powershell
 New-Code Python 2.7

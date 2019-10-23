@@ -2,18 +2,20 @@
 
 # Introduction
 
-Provides PowerShell functions to automate the setup of a development environment.
-The examples provided are tuned to my workflow but hopefully
+This tool provides PowerShell functions that automate the setup of a development
+environment. The examples provided are tuned to my workflow but hopefully
 provide enough to allow you to implement your own. 
 
 # Use Case
+
+## Setup an environment
 
 Instead of manually building (or rebuilding) a Python virtual environment
 and running pip commands to install packages this is meant to do it all in one
 command, like so:
 
-1. Clone down repository
-2. Launch Powershell and type `New-Code Python`, grab a cup of coffee
+1. Clone down a repository
+2. Launch Powershell and type `New-Code Python`. Give it a minute or two ☕
 
 ![code_python demonstration](./doc/code_python.gif)
 
@@ -21,6 +23,13 @@ The script automates the workflow of creating the Python virtualenv and
 installing packages via pip. A moment or two later everything should be ready.
 
 [More Information](./DevEnv/.pcode_python/.pcode/README.md)
+
+## Use an existing environment
+
+Now that you have setup an environment, you can easily come back to it later on.
+
+1. Navigate to the project directory
+2. Type `Enter-Code`
 
 # Installation 
 
@@ -32,13 +41,16 @@ This module is available from the PowerShell Gallery, perform the following:
 Install-Module DevEnv -Scope CurrentUser
 ```
 
-## Adding to your existing PowerShell Profile
+## Add `Enter-Code` to your PowerShell Profile
 
-It can be helpful to automatically enter your development environment when
-starting a shell in your project directory. To do this you will need to update
-your PowerShell Profile.
+Automatically enter your development environment when starting a shell in your
+project directory.
 
-### Profile?
+![Enter-Code Added to profile](./doc/enter_code_added_to_profile.gif)
+
+Simply add `Enter-Code` to your PowerShell Profile.
+
+### PowerShell Profile Setup
 
 If you don't know if you already have a profile in Powershell, open powershell
 and execute the following command
@@ -48,9 +60,9 @@ test-path $profile
 ```
 
 If the profile exists, the response is True; otherwise, it is False. If it does
-exists, skip to the existing profile section.
+exists, skip to the editing profile section.
 
-### Create a New Profile
+#### Create a New Profile
 
 To create a Windows PowerShell profile file, type:
 
@@ -58,7 +70,7 @@ To create a Windows PowerShell profile file, type:
 new-item -path $profile -itemtype file -force
 ```
 
-### Modify the Profile
+#### Editing Profile
 
 Add the following to the end of the Profile
 ```
