@@ -125,10 +125,10 @@ function main {
     try {
         if ($python.versionInfo[0] -eq "2") {
             # Python 2.7 virtualenv
-            & $python.FullPath -m virtualenv venv --no-site-packages
+            & $python.FullPath -m virtualenv venv --no-site-packages --no-download
         } else {
             # Python 3 comes with venv, but desire to use virtualenv if available
-            & $python.FullPath -m virtualenv venv --no-site-packages
+            & $python.FullPath -m virtualenv venv --no-site-packages --no-download
             if (-not $?) {
                 Write-Output "Using Built-in venv instead..."
                 & $python.FullPath -m venv venv
