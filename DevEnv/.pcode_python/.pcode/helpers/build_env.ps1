@@ -84,7 +84,9 @@ function dispMenu {
         $selection = Read-Host "Make a selection"
         if ($selection -match "\d+") {
             $selection = [int]$selection - 1
-            return $entry[$selection]
+            if ($selection -lt $py_installs.Count -and $selection -ge 0) {
+                return $entry[$selection]
+            }
         }
     }
 }
@@ -123,10 +125,10 @@ function main {
     try {
         if ($python.versionInfo[0] -eq "2") {
             # Python 2.7 virtualenv
-            & $python.FullPath -m virtualenv venv --no-site-packages
+            & $python.FullPath -m virtualenv venv --no-download
         } else {
             # Python 3 comes with venv, but desire to use virtualenv if available
-            & $python.FullPath -m virtualenv venv --no-site-packages
+            & $python.FullPath -m virtualenv venv --no-download
             if (-not $?) {
                 Write-Output "Using Built-in venv instead..."
                 & $python.FullPath -m venv venv
@@ -141,8 +143,10 @@ function main {
         exit 1
     }
     # Install requirements
-    Write-Output "Installing PIP packages listed in requirements"
-    & python -m pip install -r .\requirements.txt
+    if (Test-Path "requirements.txt") {
+        Write-Output "Installing PIP packages listed in requirements"
+        & python -m pip install -r requirements.txt
+    }
     Write-Output "Virtual Env up"
 }
 
