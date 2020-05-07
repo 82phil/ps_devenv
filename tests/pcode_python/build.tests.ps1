@@ -6,10 +6,10 @@ if (-not $ENV:BHModulePath) {
     $module_path = $ENV:BHModulePath
 }
 
-$pcode_module =  [IO.Path]::Combine(".pcode_python", ".pcode", "build_env.ps1")
+$pcode_module =  [IO.Path]::Combine(".pcode_python", ".pcode", "helpers", "build_env.ps1")
 $module_under_test = Join-Path $module_path $pcode_module
 
-Import-Module $module_under_test
+Import-Module $module_under_test -Force
 
 Describe "Python Installations using the Registry" {
 
