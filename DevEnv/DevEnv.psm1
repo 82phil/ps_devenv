@@ -1,4 +1,4 @@
-function create_workspace_aliases {
+function createWorkspaceAlias {
     Param([System.Array] $file_list)
     foreach ($alias_file in $file_list) {
         New-Alias $alias_file.BaseName $alias_file.FullName -Scope Global -Force
@@ -7,13 +7,48 @@ function create_workspace_aliases {
     }
 }
 
-function remove_workspace_aliases {
+function removeWorkspaceAlias {
     Param([System.Array] $file_list)
     foreach ($alias_file in $file_list) {
-        Remove-Alias -Name $alias_file.BaseName -Scope Global
+        Remove-Item "alias:\$($alias_file.BaseName)"
         $user_str = "Workspace alias " + ($alias_file).BaseName + " removed"
         Write-Output $user_str
     }
+}
+
+function aliasFileList {
+    $files = (Get-ChildItem -Path ([io.path]::Combine($project_dir, ".pcode")) -File
+        ) | Where-Object { $_.Name -notlike ".*" -and $_.Name -like "*.ps1"}
+    return $files
+}
+
+function execProjectScript {
+    Param([string] $script)
+    $project_dir = if (Test-Path env:PWD) {$env:PWD} else {Get-Location}
+    $script_filepath= [io.path]::Combine($project_dir, ".pcode", $script)
+    if (Test-Path $script_filepath) {
+        . $script_filepath
+    }
+
+}
+
+function getEnvVar {
+    Param([string] $env_var)
+    return [Environment]::GetEnvironmentVariable($env_var)
+}
+
+function templateDirs {
+    param(
+        [Parameter(Mandatory=$false)][bool] $user_template_dirs = $true
+    )
+    $template_dirs = @()
+    # Path where module is installed (varies based on how user installed it)
+    $module_path = Get-Variable PSScriptRoot -Scope Script -ValueOnly
+    $template_dirs += $module_path
+    if ($user_template_dirs) {
+        $template_dirs += (Join-Path (getEnvVar "APPDATA") PSDevEnv)
+    }
+    return $template_dirs
 }
 
 function Get-Code {
@@ -22,14 +57,14 @@ function Get-Code {
         [Parameter(Mandatory=$false)][string] $code_type,
         [Parameter(Mandatory=$false)][bool] $use_user_templates = $true
     )
-    $module_path = Get-Variable PSScriptRoot -Scope Script -ValueOnly
     $code_type = $code_type.ToLower()
     $pcode_dirs = @()
-    $pcode_dirs += (
-        Get-ChildItem -Path $module_path -Directory | Where-Object Name -like ".pcode_*")
-    if ($use_user_templates) {
-        $pcode_dirs += (
-            Get-ChildItem -Path (Join-Path $env:APPDATA PSDevEnv) -Directory | Where-Object Name -like ".pcode_*"
+    foreach ($template in templateDirs $use_user_templates) {
+        $pcode_dirs += (Get-ChildItem -Path $template -Directory | Where-Object Name -like ".pcode_*")
+    }
+    if ($pcode_dirs.count -lt 1) {
+        throw "Could not find template directories (.pcode_*) in the expected locations:\n{0}" -f (
+            (templateDirs $use_user_templates) -Join "`n"
         )
     }
     $pcode_pref_dirs = @{}
@@ -83,38 +118,21 @@ function New-Code {
     Copy-Item -Path (Join-Path $match.FullName "*") -Destination . -Recurse -Force
 
     # Start the initialization script for the environment
-    $init_script = [io.path]::Combine($match.FullName, ".pcode", "..init.ps1")
-    if (Test-Path $init_script) {
-        . $init_script $option
-    }
+    execProjectScript("..init.ps1")
     # Enter the new environment
     Enter-Code
 }
 
 function Enter-Code {
     # Run enterance script
-    $project_dir = if (Test-Path env:PWD) {$env:PWD} else {Get-Location}
-    $on_enter_script = [io.path]::Combine($project_dir, ".pcode", "..enter.ps1")
-    if (Test-Path $on_enter_script) {
-        . $on_enter_script
-    }
-
+    execProjectScript("..enter.ps1")
     # Create project aliases
-    $alias_files = (Get-ChildItem -Path ([io.path]::Combine($project_dir, ".pcode")) -File
-        ) | Where-Object { $_.Name -notlike ".*" -and $_.Name -like "*.ps1"}
-    create_workspace_aliases($alias_files)
+    createWorkspaceAlias(aliasFileList)
 }
 
 function Exit-Code {
     # Run exit script
-    $project_dir = if (Test-Path env:PWD) {$env:PWD} else {Get-Location}
-    $on_enter_script = [io.path]::Combine($project_dir, ".pcode", "..exit.ps1")
-    if (Test-Path $on_enter_script) {
-        . $on_exit_script
-    }
-
+    execProjectScript("..exit.ps1")
     # Remove project aliases
-    $alias_files = (Get-ChildItem -Path ([io.path]::Combine($project_dir, ".pcode")) -File
-        ) | Where-Object { $_.Name -notlike ".*" -and $_.Name -like "*.ps1"}
-    create_workspace_aliases($alias_files)
+    removeWorkspaceAlias(aliasFileList)
 }

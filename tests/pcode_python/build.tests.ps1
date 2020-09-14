@@ -89,3 +89,42 @@ Describe "Python Installations using the Registry" {
         }
     }
 }
+
+Describe "Python Installations from Windows Store" {
+
+    Context "No Windows Store Python installs" {
+
+        Mock Get-AppxPackage { return $null }
+
+        $appx = Get-PythonFromAppx
+
+        It "Windows Store Python query returns 0 items" {
+            $appx.Count | Should Be 0
+        }
+    }
+
+    context "Windows Store Python 3.7 Installed" {
+
+        Mock Get-AppxPackage { return [PSCustomObject]@{
+            "Name" = "PythonSoftwareFoundation.Python.3.7"
+            "PackageFamilyName" = "PythonSoftwareFoundation.Python.3.7_qbz5n2kfra8p0"
+        }} 
+
+        Mock Test-Path { return $true }
+
+        $appx = Get-PythonFromAppx
+
+        It "Windows Store Python query returns 1 item" {
+            $appx.Count | Should Be 1
+        }
+
+        It "Python Windows Store query item is Python 3.7 exe path" {
+            $appx | Should Be ([IO.Path]::Combine(
+                $env:LOCALAPPDATA,
+                "Microsoft",
+                "WindowsApps",
+                "PythonSoftwareFoundation.Python.3.7_qbz5n2kfra8p0",
+                "python.exe"))
+        }
+    }
+}
