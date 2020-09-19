@@ -76,8 +76,12 @@ function Get-Code {
         throw "Could not find a match for '{0}'`nThese options are available:`n{1}" -f (
             $code_type, (($pcode_pref_dirs.Keys-replace ".pcode_") -Join "`n"))
     }
-    # TODO BUGFIX: Check for an exact match before failing for multiple matches
     if ($match.count -gt 1) {
+        $exact = $pcode_pref_dirs.GetEnumerator() | Where-Object -Property key -Eq ".pcode_$($code_type)"
+        if ($exact.count -eq 1) {
+            return $exact.Value
+        }
+        # Determine if there is an exact match
         throw "Found multiple matches, use one of these:`n{0}" -f (
             ($match.Name -replace ".pcode_") -Join "`n")
     }
