@@ -98,14 +98,19 @@ function Set-Code {
     
     # Create the directory if it does not exist, otherwise error
     $pcode_user_path = New-Item -Path (
-        [IO.Path]::Combine($env:APPDATA, "PSDevEnv", ".pcode_$($code_type)")) -ItemType Directory
+        [IO.Path]::Combine((getEnvVar APPDATA), "PSDevEnv", ".pcode_$($code_type)")) -ItemType Directory
 
     # See if there is a default template to copy over
-    $match = find_code(match)
-
-    # Copy the template over to the project
-    Write-Output "Copying default project template over..."
-    Copy-Item -Path $match.FullName\* -Destination $pcode_user_path.FullName -Recurse -Force
+    try {
+        $match = Get-Code -code_type $code_type -use_user_templates $false
+    } catch {
+        $match = $null
+    }
+    if ($match) {
+        # Copy the template over to the project
+        Write-Information "Copying default project template over..."
+        Copy-Item -Path "${$match.FullName}\*" -Destination "${$pcode_user_path.FullName}" -Recurse -Force
+    }
 
     return $pcode_user_path
 }
