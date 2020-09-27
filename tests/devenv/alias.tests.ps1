@@ -17,6 +17,7 @@ InModuleScope DevEnv {
 
         Context "No files in project" {
 
+            Mock Test-Path { return $true }
             Mock Get-ChildItem { return @() }
 
             $alias_list = aliasFileList 
@@ -27,8 +28,21 @@ InModuleScope DevEnv {
 
         }
 
+        Context ".pcode directory does not exist" {
+
+            Mock Get-Location { return "/" }
+
+            $alias_list = aliasFileList
+
+            It "There should be no aliases returned" {
+                $alias_list.Count | Should Be 0
+            }
+        }
+
+
         Context "dot files (.test.ps1) in project" {
 
+            Mock Test-Path { return $true }
             Mock Get-ChildItem { return @(
                 [PSCustomObject]@{
                     "Name" = "..init.ps1"
@@ -46,6 +60,7 @@ InModuleScope DevEnv {
 
         Context "Other files in project" {
 
+            Mock Test-Path { return $true }
             Mock Get-ChildItem { return @(
                 [PSCustomObject]@{
                     "Name" = ".gitignore"
@@ -63,6 +78,7 @@ InModuleScope DevEnv {
 
         Context "alias files in project" {
 
+            Mock Test-Path { return $true }
             Mock Get-ChildItem { return @(
                 [PSCustomObject]@{
                     "Name" = "test.ps1"

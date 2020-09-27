@@ -19,6 +19,7 @@ InModuleScope DevEnv {
 
             Mock Get-ChildItem { return @() }
 
+            Mock Test-Path {return $true}
             It "should throw an error about not finding templates" {
                 { Get-Code -use_user_templates $true } | Should Throw "Could not find template directories"
             }
@@ -27,6 +28,7 @@ InModuleScope DevEnv {
 
         Context "Multiple Templates exist but do not match user request" {
 
+            Mock Test-Path {return $true}
             Mock Get-Variable {return "C:\ps_devenv"} -ParameterFilter {$Name -eq "PSScriptRoot"}
             Mock getEnvVar {return "C:\Users\a_user\AppData\Roaming"} -ParameterFilter {$env_var -eq "APPDATA"}
             Mock Get-ChildItem {return [PSCustomObject]@{
@@ -43,6 +45,7 @@ InModuleScope DevEnv {
 
         Context "Multiple Templates Match when no code type is provided" {
 
+            Mock Test-Path {return $true}
             Mock Get-Variable {return "C:\ps_devenv"} -ParameterFilter {$Name -eq "PSScriptRoot"}
             Mock getEnvVar {return "C:\Users\a_user\AppData\Roaming"} -ParameterFilter {$env_var -eq "APPDATA"}
             Mock Get-ChildItem {return [PSCustomObject]@{
@@ -59,6 +62,7 @@ InModuleScope DevEnv {
 
         Context "Template in just the User Template location" {
 
+            Mock Test-Path {return $true}
             Mock Get-Variable {return "C:\ps_devenv"} -ParameterFilter {$Name -eq "PSScriptRoot"}
             Mock getEnvVar {return "C:\Users\a_user\AppData\Roaming"} -ParameterFilter {$env_var -eq "APPDATA"}
             Mock Get-ChildItem {return @{} } -ParameterFilter { $Path -eq "C:\ps_devenv" }
@@ -75,6 +79,7 @@ InModuleScope DevEnv {
 
         Context "Prefer User Template over Default" {
 
+            Mock Test-Path {return $true}
             Mock Get-Variable {return "C:\ps_devenv"} -ParameterFilter {$Name -eq "PSScriptRoot"}
             Mock getEnvVar {return "C:\Users\a_user\AppData\Roaming"} -ParameterFilter {$env_var -eq "APPDATA"}
             Mock Get-ChildItem {return [PSCustomObject]@{
@@ -96,6 +101,7 @@ InModuleScope DevEnv {
 
         Context "Will use exact match for multiple findings"{
 
+            Mock Test-Path {return $true}
             Mock Get-Variable {return "C:\ps_devenv"} -ParameterFilter {$Name -eq "PSScriptRoot"}
             Mock getEnvVar {return "C:\Users\a_user\AppData\Roaming"} -ParameterFilter {$env_var -eq "APPDATA"}
             Mock Get-ChildItem {return [PSCustomObject]@{

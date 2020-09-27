@@ -26,9 +26,24 @@ InModuleScope DevEnv {
             }
 
         }
+
+        Context "User Template Dir does not exist" {
+            Mock Get-Variable {return "C:\ps_devenv"} -ParameterFilter {$Name -eq "PSScriptRoot"}
+            Mock getEnvVar {return "C:\Users\a_user\AppData\Roaming"} -ParameterFilter {$env_var -eq "APPDATA"}
+
+            $dirs = templateDirs $true
+
+            It "Should be both the module and users template directory" {
+                $dirs.Count | Should be 1
+                $dirs | Should Be "C:\ps_devenv"
+            }
+
+        }
+
         Context "Module and User Templates" {
             Mock Get-Variable {return "C:\ps_devenv"} -ParameterFilter {$Name -eq "PSScriptRoot"}
             Mock getEnvVar {return "C:\Users\a_user\AppData\Roaming"} -ParameterFilter {$env_var -eq "APPDATA"}
+            Mock Test-Path {return $true}
 
             $dirs = templateDirs $true
 

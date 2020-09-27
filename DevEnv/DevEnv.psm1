@@ -1,3 +1,12 @@
+function getProjectPath {
+    if ($null -ne $env:PWD -and (Test-Path $env:PWD)) {
+        return $env:PWD
+    } else {
+        return Get-Location
+    }
+}
+
+
 function createWorkspaceAlias {
     Param([System.Array] $file_list)
     foreach ($alias_file in $file_list) {
@@ -17,6 +26,10 @@ function removeWorkspaceAlias {
 }
 
 function aliasFileList {
+    $project_dir = getProjectPath
+    if (-not (Test-Path (Join-Path $project_dir ".pcode"))) {
+        return @{}
+    }
     $files = (Get-ChildItem -Path ([io.path]::Combine($project_dir, ".pcode")) -File
         ) | Where-Object { $_.Name -notlike ".*" -and $_.Name -like "*.ps1"}
     return $files
@@ -24,8 +37,7 @@ function aliasFileList {
 
 function execProjectScript {
     Param([string] $script)
-    $project_dir = if (Test-Path env:PWD) {$env:PWD} else {Get-Location}
-    $script_filepath= [io.path]::Combine($project_dir, ".pcode", $script)
+    $script_filepath= [io.path]::Combine((getProjectPath), ".pcode", $script)
     if (Test-Path $script_filepath) {
         . $script_filepath
     }
@@ -46,7 +58,9 @@ function templateDirs {
     $module_path = Get-Variable PSScriptRoot -Scope Script -ValueOnly
     $template_dirs += $module_path
     if ($user_template_dirs) {
-        $template_dirs += (Join-Path (getEnvVar "APPDATA") PSDevEnv)
+        if (Test-Path (Join-Path (getEnvVar "APPDATA") "PSDevEnv")) {
+            $template_dirs += (Join-Path (getEnvVar "APPDATA") "PSDevEnv")
+        }
     }
     return $template_dirs
 }
@@ -59,7 +73,7 @@ function Get-Code {
     )
     $code_type = $code_type.ToLower()
     $pcode_dirs = @()
-    foreach ($template in templateDirs $use_user_templates) {
+    foreach ($template in (templateDirs $use_user_templates)) {
         $pcode_dirs += (Get-ChildItem -Path $template -Directory | Where-Object Name -like ".pcode_*")
     }
     if ($pcode_dirs.count -lt 1) {
@@ -109,7 +123,7 @@ function Set-Code {
     if ($match) {
         # Copy the template over to the project
         Write-Information "Copying default project template over..."
-        Copy-Item -Path "${$match.FullName}\*" -Destination "${$pcode_user_path.FullName}" -Recurse -Force
+        Copy-Item -Path "$($match.FullName)\*" -Destination "$($pcode_user_path.FullName)" -Recurse -Force
     }
 
     return $pcode_user_path
