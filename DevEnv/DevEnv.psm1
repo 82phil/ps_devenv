@@ -28,7 +28,7 @@ function removeWorkspaceAlias {
 function aliasFileList {
     $project_dir = getProjectPath
     if (-not (Test-Path (Join-Path $project_dir ".pcode"))) {
-        return @{}
+        return $null
     }
     $files = (Get-ChildItem -Path ([io.path]::Combine($project_dir, ".pcode")) -File
         ) | Where-Object { $_.Name -notlike ".*" -and $_.Name -like "*.ps1"}

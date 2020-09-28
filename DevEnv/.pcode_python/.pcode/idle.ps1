@@ -1,1 +1,1 @@
-python -m idlelib.idle
+Start-Process "python" -ArgumentList "-m idlelib.idle" -NoNewWindow
