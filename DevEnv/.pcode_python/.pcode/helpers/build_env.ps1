@@ -143,8 +143,10 @@ function main {
         exit 1
     }
     # Install requirements
-    Write-Output "Installing PIP packages listed in requirements"
-    & python -m pip install -r .\requirements.txt
+    if (Test-Path "requirements.txt") {
+        Write-Output "Installing PIP packages listed in requirements"
+        & python -m pip install -r requirements.txt
+    }
     Write-Output "Virtual Env up"
 }
 

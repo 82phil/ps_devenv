@@ -31,13 +31,8 @@ If a PowerShell session is started in the workspace root directory or has the $e
 ```powershell
 Python workspace alias build added
 Python workspace alias clean added
-(venv) PS C:\git\CruSSH>
+(venv) PS C:\git\project>
 ```
-
-## build
-
-Runs the build script. This will setup the virtual environment and install
-pip packages listed in requirements.txt
 
 ## clean
 
