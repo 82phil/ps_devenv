@@ -2,31 +2,31 @@
 
 # Introduction
 
-This tool provides PowerShell functions that automate the setup of a development
-environment. The examples provided are tuned to my workflow but hopefully
-provide enough to allow you to implement your own. 
+This tool provides PowerShell functions that automate the set up and use of a
+development environment. The examples provided are tuned to my workflow but
+provide enough for you to implement your own.
 
 # Use Case
 
-## Setup an environment
+## Set up an environment
 
-Instead of manually building (or rebuilding) a Python virtual environment
-and running pip commands to install packages this is meant to do it all in one
-command, like so:
+Instead of building a Python virtual environment and running pip commands to
+install packages, this tool handles it in one command:
 
 1. Clone down a repository
 2. Launch Powershell and type `New-Code Python`. Give it a minute or two ☕
 
 ![code_python demonstration](./doc/code_python.gif)
 
-The script automates the workflow of creating the Python virtualenv and
-installing packages via pip. A moment or two later everything should be ready.
+The script automates the workflow of creating a Python virtual environment,
+installing the requirements file via pip, setting up environmental variables,
+and providing additional tools set up as aliases.
 
-[More Information](./DevEnv/.pcode_python/.pcode/README.md)
+[Python Dev Env Template README](./DevEnv/.pcode_python/.pcode/README.md)
 
 ## Use an existing environment
 
-Now that you have setup an environment, you can easily come back to it later on.
+Now that you have set up an environment, you can easily come back to it later on.
 
 1. Navigate to the project directory
 2. Type `Enter-Code`
@@ -48,57 +48,54 @@ project directory.
 
 ![Enter-Code Added to profile](./doc/enter_code_added_to_profile.gif)
 
-Simply add `Enter-Code` to your PowerShell Profile.
-
-### PowerShell Profile Setup
-
-If you don't know if you already have a profile in Powershell, open powershell
-and execute the following command
+Simply add `Enter-Code` to your PowerShell Profile by either editing it with
+a text editor (ex: `notepad.exe $profile`) or running the following in
+PowerShell to append it to the end of the profile.
 
 ```powershell
-test-path $profile
+if (-not (test-path $profile)) {
+    new-item -path $profile -itemtype file -force
+}
+Add-Content $profile "`nEnter-Code"
 ```
 
-If the profile exists, the response is True; otherwise, it is False. If it does
-exists, skip to the editing profile section.
+# Create your templates
 
-#### Create a New Profile
-
-To create a Windows PowerShell profile file, type:
-
-```powershell
-new-item -path $profile -itemtype file -force
-```
-
-#### Editing Profile
-
-Add the following to the end of the Profile
-```
-Enter-Code
-```
-
-Now your session will be automatically setup when you launch a PowerShell
-session in your project directory.
-
-# Structure
-
-Under each environment is a `.pcode` folder. Under this are two scripts, `.init.ps1` and
-`autorun.ps1`. The init script is called when the environment is first built. The autorun
-script is called if the environment already exists.
+Use the `Set-Code` command to create your environment templates. If there
+is an existing template under DevEnv under that name, it will be copied to
+your template.
 
 ```
-└───.pcode_python
-    ├───.pcode
-    │       .init.ps1
-    │       autorun.ps1
-    │       build_env.ps1
-    │       clean_env.ps1
-    │       README.md
-    │
-    └───.vscode
-            settings.json
+Set-Code python
+explorer.exe (Get-Code python).FullName
 ```
 
-Initially all contents are copied over from the directory where the module is.
-Take advantage of this to also bring over files like settings for your IDE, or a
-`.gitignore` file.
+# Environment File Structure
+
+DevEnv calls scripts in the `.pcode` directory. Files prefixed with double
+dots are executed when a function is called (ex: `Enter-Code`). Any `*.ps1`
+files are set up as aliases, with the same name as the file, on project
+entrance. Other file types and sub-directories are not used by DevEnv.
+
+```
+├───.pcode    - DevEnv executes scripts under this directory
+│   │   ..enter.ps1   - Entrant Script (Enter-Code)
+│   │   ..exit.ps1    - Exit Script (Exit-Code)
+│   │   ..init.ps1    - Initialization Script (New-Code)
+│   │   clean.ps1     - Aliases
+│   │   idle.ps1      *
+│   │   lint.ps1      *
+│   │   README.md
+│   └───helpers
+│           build_env.ps1
+│           info.py
+│
+└───.vscode
+        settings.json
+
+```
+
+You can add additional files, which are copied over when creating a new
+developer environment (`New-Code`), such as `.gitignore`. In the Python
+template above, a `.vscode` directory provides additional for [Visual Studio
+Code](https://code.visualstudio.com/) in the development environment.
