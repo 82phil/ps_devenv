@@ -1,11 +1,37 @@
 function getProjectPath {
-    if ($null -ne $env:PWD -and (Test-Path $env:PWD)) {
-        return $env:PWD
+    if ($null -ne $_DEVENV_PROJECT_PATH -and (Test-Path $_DEVENV_PROJECT_PATH)) {
+        return $_DEVENV_PROJECT_PATH
     } else {
-        return Get-Location
+        return (Get-Location).Path
     }
 }
 
+function UpdatePwshPrompt {
+    function global:_old_pwsh_prompt {
+        ""
+    }
+    function global:_devenv_dir_tracker {
+        $curr_loc = [string]($executionContext.SessionState.Path.CurrentLocation)
+        $in_project = $curr_loc.StartsWith($_DEVENV_PROJECT_PATH)
+        if (-not $in_project) {
+            Exit-Code | Out-Null
+            $function:prompt = $function:_old_pwsh_prompt
+            return ""
+        }
+        if ($null -eq $_DEVENV_PROJECT_PATH) {
+            $function:prompt = $function:_old_pwsh_prompt
+            return ""
+        }
+        return "!DEV>"
+    }
+
+    $function:_old_pwsh_prompt = $function:prompt
+    function global:prompt {
+        $new_prompt_value = & $function:_devenv_dir_tracker
+        $previous_prompt_value = & $function:_old_pwsh_prompt
+        return ($new_prompt_value + $previous_prompt_value)
+    }
+}
 
 function createWorkspaceAlias {
     Param([System.Array] $file_list)
@@ -37,11 +63,12 @@ function aliasFileList {
 
 function execProjectScript {
     Param([string] $script)
-    $script_filepath= [io.path]::Combine((getProjectPath), ".pcode", $script)
+    $script_filepath = [io.path]::Combine((getProjectPath), ".pcode", $script)
     if (Test-Path $script_filepath) {
         . $script_filepath
+    } else {
+        throw "Did not find script file {0} in .pcode" -f ($script)
     }
-
 }
 
 function getEnvVar {
@@ -140,17 +167,35 @@ function New-Code {
     Write-Output "Copying project template over..."
     Copy-Item -Path (Join-Path $match.FullName "*") -Destination . -Recurse -Force
 
+    # Update the prompt to track the current directory
+    UpdatePwshPrompt
     # Start the initialization script for the environment
     execProjectScript("..init.ps1")
     # Enter the new environment
-    Enter-Code
+    Enter-Code -track_dir $false
 }
 
 function Enter-Code {
-    # Run enterance script
-    execProjectScript("..enter.ps1")
-    # Create project aliases
-    createWorkspaceAlias(aliasFileList)
+    param(
+        [Parameter(Mandatory=$false)][bool] $track_dir = $true,
+        [Parameter(Mandatory=$false)][bool] $raise_on_failure = $false
+    )
+    try {
+        # Add project path to Global Project Path variable
+        New-Variable -Scope global -Name _DEVENV_PROJECT_PATH -Force -Value (getProjectPath)
+        # Update the prompt to track the current directory
+        if ($track_dir) {
+            UpdatePwshPrompt
+        }
+        # Run enterance script
+        execProjectScript("..enter.ps1")
+        # Create project aliases
+        createWorkspaceAlias(aliasFileList)
+    } catch {
+        if ($raise_on_failure) {
+            throw $_
+        }
+    }
 }
 
 function Exit-Code {
@@ -158,4 +203,6 @@ function Exit-Code {
     execProjectScript("..exit.ps1")
     # Remove project aliases
     removeWorkspaceAlias(aliasFileList)
+    # Reset Global Project Path variable
+    New-Variable -Scope global -Name _DEVENV_PROJECT_PATH -Force -Value $null
 }

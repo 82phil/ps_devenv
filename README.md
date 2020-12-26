@@ -2,9 +2,16 @@
 
 # Introduction
 
-This tool provides PowerShell functions that automate the set up and use of a
-development environment. The examples provided are tuned to my workflow but
-provide enough for you to implement your own.
+This tool provides PowerShell functions that automate the workflow of setting
+up and using a development environment.
+- Create templates to perform operations like set environment variables, IDE
+workspace settings, etc.
+- Create aliases specific to the project, handling
+routine operations
+- Easily switch between development environments
+
+The examples provided are geared to my
+work but will provide enough for you to implement your own.
 
 # Use Case
 
