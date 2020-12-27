@@ -6,30 +6,37 @@ function getProjectPath {
     }
 }
 
+function getProjectSettings {
+    $devenv_settings = [io.path]::Combine((getProjectPath), ".pcode", ".settings.json")
+    return (Get-Content $devenv_settings -Encoding UTF8) | ConvertFrom-Json
+}
+
 function UpdatePwshPrompt {
-    function global:_old_pwsh_prompt {
+    New-Variable -Scope global -Name _DEVENV_SETTINGS -Force -Value (getProjectSettings)
+
+    function global:_DEVENV_OLD_PROMPT {
         ""
     }
-    function global:_devenv_dir_tracker {
+    $function:_DEVENV_OLD_PROMPT = $function:prompt
+
+    function global:_DEVENV_TRACKER {
         $curr_loc = [string]($executionContext.SessionState.Path.CurrentLocation)
         $in_project = $curr_loc.StartsWith($_DEVENV_PROJECT_PATH)
         if (-not $in_project) {
             Exit-Code | Out-Null
-            $function:prompt = $function:_old_pwsh_prompt
-            return ""
+            $function:prompt = $function:_DEVENV_OLD_PROMPT
+            return
         }
         if ($null -eq $_DEVENV_PROJECT_PATH) {
-            $function:prompt = $function:_old_pwsh_prompt
-            return ""
+            $function:prompt = $function:_DEVENV_OLD_PROMPT
+            return
         }
-        return "!DEV>"
+        Write-Host -nonewline $_DEVENV_SETTINGS."prompt.text"
     }
 
-    $function:_old_pwsh_prompt = $function:prompt
     function global:prompt {
-        $new_prompt_value = & $function:_devenv_dir_tracker
-        $previous_prompt_value = & $function:_old_pwsh_prompt
-        return ($new_prompt_value + $previous_prompt_value)
+        & $function:_DEVENV_TRACKER
+        return & $function:_DEVENV_OLD_PROMPT
     }
 }
 
