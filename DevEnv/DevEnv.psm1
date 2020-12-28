@@ -6,35 +6,34 @@ function getProjectPath {
     }
 }
 
-function getProjectSettings {
+function convertToHashtable {
+    param ($suspect_object)
 
-    function ConvertTo-Hashtable {
-        param ($suspect_object)
-    
-        $conv_hash_table = @{}
-        foreach ($property in $suspect_object.PSObject.Properties) {
-            if ($property.Value -is [psobject]) {
-                $conv_hash_table[$property.Name] = ConvertTo-Hashtable $Property.Value
-            } else {
-                # Null values are placeholders in settings, not used
-                if ($null -ne $property.Value) {
-                    $conv_hash_table[$property.Name] = $Property.Value
-                }
+    $conv_hash_table = @{}
+    foreach ($property in $suspect_object.PSObject.Properties) {
+        if ($property.Value -is [psobject]) {
+            $conv_hash_table[$property.Name] = convertToHashtable $Property.Value
+        } else {
+            # Null values are placeholders in settings, not used
+            if ($null -ne $property.Value) {
+                $conv_hash_table[$property.Name] = $Property.Value
             }
         }
-        $conv_hash_table
     }
+    $conv_hash_table
+}
 
+function getProjectSettings {
     # Attempt to pull settings file from project template
     $project = [io.path]::Combine((getProjectPath), ".pcode", ".settings.json")
     if (Test-Path -Path $project) {
-        $project_settings = ConvertTo-Hashtable(
+        $project_settings = convertToHashtable(
             (Get-Content $project -Encoding UTF8) | ConvertFrom-Json)
         return $project_settings
     } else {
         # Fallback to default settings
         $defaults = Join-Path (Split-Path -Parent $PSCommandPath) -ChildPath defaults.json
-        $default_settings = ConvertTo-Hashtable(
+        $default_settings = convertToHashtable(
             (Get-Content $defaults -Encoding UTF8) | ConvertFrom-Json)
         return $default_settings
     }

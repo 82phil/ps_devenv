@@ -30,7 +30,7 @@ InModuleScope DevEnv {
 
         Context ".pcode directory does not exist" {
 
-            Mock Get-Location { return "/" }
+            Mock getProjectPath { return "/" }
 
             $alias_list = aliasFileList
 
