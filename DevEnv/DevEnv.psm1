@@ -25,18 +25,17 @@ function getProjectSettings {
         $conv_hash_table
     }
 
-    # Defaults used to guarantee expected settings exist
-    $defaults = Join-Path (Split-Path -Parent $PSCommandPath) -ChildPath defaults.json
-    $default_settings = ConvertTo-Hashtable(
-        (Get-Content $defaults -Encoding UTF8) | ConvertFrom-Json)
-    
-    # Attempt to merge the settings from the project if they exist
+    # Attempt to pull settings file from project template
     $project = [io.path]::Combine((getProjectPath), ".pcode", ".settings.json")
     if (Test-Path -Path $project) {
         $project_settings = ConvertTo-Hashtable(
             (Get-Content $project -Encoding UTF8) | ConvertFrom-Json)
-        return $default_settings + $project_settings
+        return $project_settings
     } else {
+        # Fallback to default settings
+        $defaults = Join-Path (Split-Path -Parent $PSCommandPath) -ChildPath defaults.json
+        $default_settings = ConvertTo-Hashtable(
+            (Get-Content $defaults -Encoding UTF8) | ConvertFrom-Json)
         return $default_settings
     }
 }
