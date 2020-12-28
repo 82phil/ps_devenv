@@ -7,11 +7,41 @@ function getProjectPath {
 }
 
 function getProjectSettings {
-    $devenv_settings = [io.path]::Combine((getProjectPath), ".pcode", ".settings.json")
-    return (Get-Content $devenv_settings -Encoding UTF8) | ConvertFrom-Json
+
+    function ConvertTo-Hashtable {
+        param ($suspect_object)
+    
+        $conv_hash_table = @{}
+        foreach ($property in $suspect_object.PSObject.Properties) {
+            if ($property.Value -is [psobject]) {
+                $conv_hash_table[$property.Name] = ConvertTo-Hashtable $Property.Value
+            } else {
+                # Null values are placeholders in settings, not used
+                if ($null -ne $property.Value) {
+                    $conv_hash_table[$property.Name] = $Property.Value
+                }
+            }
+        }
+        $conv_hash_table
+    }
+
+    # Defaults used to guarantee expected settings exist
+    $defaults = Join-Path (Split-Path -Parent $PSCommandPath) -ChildPath defaults.json
+    $default_settings = ConvertTo-Hashtable(
+        (Get-Content $defaults -Encoding UTF8) | ConvertFrom-Json)
+    
+    # Attempt to merge the settings from the project if they exist
+    $project = [io.path]::Combine((getProjectPath), ".pcode", ".settings.json")
+    if (Test-Path -Path $project) {
+        $project_settings = ConvertTo-Hashtable(
+            (Get-Content $project -Encoding UTF8) | ConvertFrom-Json)
+        return $default_settings + $project_settings
+    } else {
+        return $default_settings
+    }
 }
 
-function UpdatePwshPrompt {
+function updatePwshPrompt {
     New-Variable -Scope global -Name _DEVENV_SETTINGS -Force -Value (getProjectSettings)
 
     function global:_DEVENV_OLD_PROMPT {
@@ -19,23 +49,26 @@ function UpdatePwshPrompt {
     }
     $function:_DEVENV_OLD_PROMPT = $function:prompt
 
-    function global:_DEVENV_TRACKER {
+    function global:_DEVENV_PROMPT {
         $curr_loc = [string]($executionContext.SessionState.Path.CurrentLocation)
         $in_project = $curr_loc.StartsWith($_DEVENV_PROJECT_PATH)
         if (-not $in_project) {
             Exit-Code | Out-Null
             $function:prompt = $function:_DEVENV_OLD_PROMPT
+            # Overwrite currently written prompt so user does not have to hit enter again
+            Write-Host -nonewline "`r"
             return
         }
         if ($null -eq $_DEVENV_PROJECT_PATH) {
             $function:prompt = $function:_DEVENV_OLD_PROMPT
             return
         }
-        Write-Host -nonewline $_DEVENV_SETTINGS."prompt.text"
+        $prompt_settings = $_DEVENV_SETTINGS.prompt
+        Write-Host -nonewline @prompt_settings
     }
 
     function global:prompt {
-        & $function:_DEVENV_TRACKER
+        & $function:_DEVENV_PROMPT
         return & $function:_DEVENV_OLD_PROMPT
     }
 }
@@ -174,25 +207,25 @@ function New-Code {
     Write-Output "Copying project template over..."
     Copy-Item -Path (Join-Path $match.FullName "*") -Destination . -Recurse -Force
 
-    # Update the prompt to track the current directory
-    UpdatePwshPrompt
+    # Update the prompt
+    updatePwshPrompt
     # Start the initialization script for the environment
     execProjectScript("..init.ps1")
     # Enter the new environment
-    Enter-Code -track_dir $false
+    Enter-Code -update_prompt $false
 }
 
 function Enter-Code {
     param(
-        [Parameter(Mandatory=$false)][bool] $track_dir = $true,
+        [Parameter(Mandatory=$false)][bool] $update_prompt = $true,
         [Parameter(Mandatory=$false)][bool] $raise_on_failure = $false
     )
     try {
         # Add project path to Global Project Path variable
         New-Variable -Scope global -Name _DEVENV_PROJECT_PATH -Force -Value (getProjectPath)
-        # Update the prompt to track the current directory
-        if ($track_dir) {
-            UpdatePwshPrompt
+        # Update the prompt
+        if ($update_prompt) {
+            updatePwshPrompt
         }
         # Run enterance script
         execProjectScript("..enter.ps1")
