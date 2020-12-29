@@ -3,6 +3,6 @@
     "prompt": {
         "Object": "(dev) ",
         "BackgroundColor": null,
-        "ForegroundColor": "blue"
+        "ForegroundColor": null
     }
 }
