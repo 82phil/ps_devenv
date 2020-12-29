@@ -1,11 +1,75 @@
 function getProjectPath {
-    if ($null -ne $env:PWD -and (Test-Path $env:PWD)) {
-        return $env:PWD
+    if ($null -ne $_DEVENV_PROJECT_PATH -and (Test-Path $_DEVENV_PROJECT_PATH)) {
+        return $_DEVENV_PROJECT_PATH
     } else {
-        return Get-Location
+        return (Get-Location).Path
     }
 }
 
+function convertToHashtable {
+    param ($suspect_object)
+
+    $conv_hash_table = @{}
+    foreach ($property in $suspect_object.PSObject.Properties) {
+        if ($property.Value -is [psobject]) {
+            $conv_hash_table[$property.Name] = convertToHashtable $Property.Value
+        } else {
+            # Null values are placeholders in settings, not used
+            if ($null -ne $property.Value) {
+                $conv_hash_table[$property.Name] = $Property.Value
+            }
+        }
+    }
+    $conv_hash_table
+}
+
+function getProjectSettings {
+    # Attempt to pull settings file from project template
+    $project = [io.path]::Combine((getProjectPath), ".pcode", ".settings.json")
+    if (Test-Path -Path $project) {
+        $project_settings = convertToHashtable(
+            (Get-Content $project -Encoding UTF8) | ConvertFrom-Json)
+        return $project_settings
+    } else {
+        # Fallback to default settings
+        $defaults = Join-Path (Split-Path -Parent $PSCommandPath) -ChildPath defaults.json
+        $default_settings = convertToHashtable(
+            (Get-Content $defaults -Encoding UTF8) | ConvertFrom-Json)
+        return $default_settings
+    }
+}
+
+function updatePwshPrompt {
+    New-Variable -Scope global -Name _DEVENV_SETTINGS -Force -Value (getProjectSettings)
+
+    function global:_DEVENV_OLD_PROMPT {
+        ""
+    }
+    $function:_DEVENV_OLD_PROMPT = $function:prompt
+
+    function global:_DEVENV_PROMPT {
+        $curr_loc = [string]($executionContext.SessionState.Path.CurrentLocation)
+        $in_project = $curr_loc.StartsWith($_DEVENV_PROJECT_PATH)
+        if (-not $in_project) {
+            Exit-Code | Out-Null
+            $function:prompt = $function:_DEVENV_OLD_PROMPT
+            # Overwrite currently written prompt so user does not have to hit enter again
+            Write-Host -nonewline "`r"
+            return
+        }
+        if ($null -eq $_DEVENV_PROJECT_PATH) {
+            $function:prompt = $function:_DEVENV_OLD_PROMPT
+            return
+        }
+        $prompt_settings = $_DEVENV_SETTINGS.prompt
+        Write-Host -nonewline @prompt_settings
+    }
+
+    function global:prompt {
+        & $function:_DEVENV_PROMPT
+        return & $function:_DEVENV_OLD_PROMPT
+    }
+}
 
 function createWorkspaceAlias {
     Param([System.Array] $file_list)
@@ -35,13 +99,19 @@ function aliasFileList {
     return $files
 }
 
+function getProjectScriptPath {
+    Param([string] $script)
+    return [io.path]::Combine((getProjectPath), ".pcode", $script)
+
+}
 function execProjectScript {
     Param([string] $script)
-    $script_filepath= [io.path]::Combine((getProjectPath), ".pcode", $script)
+    $script_filepath = getProjectScriptPath $script
     if (Test-Path $script_filepath) {
         . $script_filepath
+    } else {
+        throw "Did not find script file {0} in .pcode" -f ($script)
     }
-
 }
 
 function getEnvVar {
@@ -140,17 +210,39 @@ function New-Code {
     Write-Output "Copying project template over..."
     Copy-Item -Path (Join-Path $match.FullName "*") -Destination . -Recurse -Force
 
+    # Update the prompt
+    updatePwshPrompt
     # Start the initialization script for the environment
     execProjectScript("..init.ps1")
     # Enter the new environment
-    Enter-Code
+    Enter-Code -update_prompt $false
 }
 
 function Enter-Code {
-    # Run enterance script
-    execProjectScript("..enter.ps1")
-    # Create project aliases
-    createWorkspaceAlias(aliasFileList)
+    param(
+        [Parameter(Mandatory=$false)][bool] $update_prompt = $true,
+        [Parameter(Mandatory=$false)][bool] $raise_on_failure = $false
+    )
+    # Project is already setup or entrant script is not available
+    if (($null -ne $_DEVENV_PROJECT_PATH) -or -not (Test-Path (getProjectScriptPath "..enter.ps1"))) {
+        return
+    }
+    try {
+        # Add project path to Global Project Path variable
+        New-Variable -Scope global -Name _DEVENV_PROJECT_PATH -Force -Value (getProjectPath)
+        # Update the prompt
+        if ($update_prompt) {
+            updatePwshPrompt
+        }
+        # Run enterance script
+        execProjectScript("..enter.ps1")
+        # Create project aliases
+        createWorkspaceAlias(aliasFileList)
+    } catch {
+        if ($raise_on_failure) {
+            throw $_
+        }
+    }
 }
 
 function Exit-Code {
@@ -158,4 +250,6 @@ function Exit-Code {
     execProjectScript("..exit.ps1")
     # Remove project aliases
     removeWorkspaceAlias(aliasFileList)
+    # Reset Global Project Path variable
+    New-Variable -Scope global -Name _DEVENV_PROJECT_PATH -Force -Value $null
 }

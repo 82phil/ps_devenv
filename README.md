@@ -2,9 +2,16 @@
 
 # Introduction
 
-This tool provides PowerShell functions that automate the set up and use of a
-development environment. The examples provided are tuned to my workflow but
-provide enough for you to implement your own.
+This tool provides PowerShell functions that automate the workflow of setting
+up and using a development environment.
+
+- Create templates to perform operations like setting environment variables, IDE
+workspace settings, etc.
+- Create aliases specific to the project, handling routine operations
+- Easily switch between development environments
+
+The examples provided are geared to my work but will provide enough for you
+to implement your own.
 
 # Use Case
 
@@ -29,7 +36,41 @@ and providing additional tools set up as aliases.
 Now that you have set up an environment, you can easily come back to it later on.
 
 1. Navigate to the project directory
-2. Type `Enter-Code`
+2. Type `Enter-Code` and your environment is setup and ready to use
+3. Type `Exit-Code` to tear down the environment, or simply leave the project
+directory.
+
+## Tracking Project Directories
+
+Currently this is a work in progress. Exiting the project directory is
+tracked, but not the entrance into the project. Use `Enter-Code` for now.
+
+The `.settings.json` file in `.pcode` that allows you to change the prompt of
+the project. UTF8 encoding is supported, use Windows Terminal for characters
+such as emojis to work.
+
+By default the prompt is updated before executing the entrant code so, for
+example, the Python virtualenv will also update the prompt and will appear
+like so:
+
+![default prompt](./doc/default_prompt.png)
+
+However there is a trick if you want to only see the devenv prompt, simply add
+a carriage return to the beginning of the prompt.
+
+```json
+{
+    "version": 1.0,
+    "prompt": {
+        "Object": "\r🐍 ",
+        "BackgroundColor": null,
+        "ForegroundColor": null
+    }
+}
+```
+
+![emoji and overwrite prompt](./doc/emoji_overwrite_prompt.png)
+
 
 # Installation 
 
