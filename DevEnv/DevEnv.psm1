@@ -99,9 +99,14 @@ function aliasFileList {
     return $files
 }
 
+function getProjectScriptPath {
+    Param([string] $script)
+    return [io.path]::Combine((getProjectPath), ".pcode", $script)
+
+}
 function execProjectScript {
     Param([string] $script)
-    $script_filepath = [io.path]::Combine((getProjectPath), ".pcode", $script)
+    $script_filepath = getProjectScriptPath $script
     if (Test-Path $script_filepath) {
         . $script_filepath
     } else {
@@ -218,6 +223,10 @@ function Enter-Code {
         [Parameter(Mandatory=$false)][bool] $update_prompt = $true,
         [Parameter(Mandatory=$false)][bool] $raise_on_failure = $false
     )
+    # Project is already setup or entrant script is not available
+    if (($null -ne $_DEVENV_PROJECT_PATH) -or -not (Test-Path (getProjectScriptPath "..enter.ps1"))) {
+        return
+    }
     try {
         # Add project path to Global Project Path variable
         New-Variable -Scope global -Name _DEVENV_PROJECT_PATH -Force -Value (getProjectPath)
