@@ -39,9 +39,18 @@ function getProjectSettings {
     }
 }
 
-function updatePwshPrompt {
+function initializeDevProject {
     New-Variable -Scope global -Name _DEVENV_SETTINGS -Force -Value (getProjectSettings)
+}
 
+function preservePrompt {
+    function global:_DEVENV_ORIG_PROMPT {
+        ""
+    }
+    $function:_DEVENV_ORIG_PROMPT = $function:prompt
+}
+
+function updatePwshPrompt {
     function global:_DEVENV_OLD_PROMPT {
         ""
     }
@@ -52,13 +61,9 @@ function updatePwshPrompt {
         $in_project = $curr_loc.StartsWith($_DEVENV_PROJECT_PATH)
         if (-not $in_project) {
             Exit-Code | Out-Null
-            $function:prompt = $function:_DEVENV_OLD_PROMPT
+            $function:prompt = $function:_DEVENV_ORIG_PROMPT
             # Overwrite currently written prompt so user does not have to hit enter again
             Write-Host -nonewline "`r"
-            return
-        }
-        if ($null -eq $_DEVENV_PROJECT_PATH) {
-            $function:prompt = $function:_DEVENV_OLD_PROMPT
             return
         }
         $prompt_settings = $_DEVENV_SETTINGS.prompt
@@ -66,8 +71,17 @@ function updatePwshPrompt {
     }
 
     function global:prompt {
-        & $function:_DEVENV_PROMPT
-        return & $function:_DEVENV_OLD_PROMPT
+        if ($null -eq $_DEVENV_PROJECT_PATH) {
+            $function:prompt = $function:_DEVENV_ORIG_PROMPT
+            return
+        }
+        if ($null -eq $_DEVENV_PROMPT_FIRED) {
+            New-Variable -Name _DEVENV_PROMPT_FIRED -Force -Value $true
+            & $function:_DEVENV_PROMPT
+            return & $function:_DEVENV_OLD_PROMPT
+        } else {
+            return & $function:_DEVENV_ORIG_PROMPT
+        }
     }
 }
 
@@ -210,12 +224,11 @@ function New-Code {
     Write-Output "Copying project template over..."
     Copy-Item -Path (Join-Path $match.FullName "*") -Destination . -Recurse -Force
 
-    # Update the prompt
-    updatePwshPrompt
+    initializeDevProject
     # Start the initialization script for the environment
     execProjectScript("..init.ps1")
     # Enter the new environment
-    Enter-Code -update_prompt $false
+    Enter-Code -update_prompt $true
 }
 
 function Enter-Code {
@@ -223,19 +236,24 @@ function Enter-Code {
         [Parameter(Mandatory=$false)][bool] $update_prompt = $true,
         [Parameter(Mandatory=$false)][bool] $raise_on_failure = $false
     )
+    initializeDevProject
     # Project is already setup or entrant script is not available
     if (($null -ne $_DEVENV_PROJECT_PATH) -or -not (Test-Path (getProjectScriptPath "..enter.ps1"))) {
         return
     }
+    # Add project path to Global Project Path variable
+    New-Variable -Scope global -Name _DEVENV_PROJECT_PATH -Force -Value (getProjectPath)
     try {
-        # Add project path to Global Project Path variable
-        New-Variable -Scope global -Name _DEVENV_PROJECT_PATH -Force -Value (getProjectPath)
+        preservePrompt
         # Update the prompt
         if ($update_prompt) {
             updatePwshPrompt
         }
         # Run enterance script
         execProjectScript("..enter.ps1")
+        if ($update_prompt) {
+            updatePwshPrompt
+        }
         # Create project aliases
         createWorkspaceAlias(aliasFileList)
     } catch {
