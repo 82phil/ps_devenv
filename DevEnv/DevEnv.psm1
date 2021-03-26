@@ -2,7 +2,11 @@ function getProjectPath {
     if ($null -ne $_DEVENV_PROJECT_PATH -and (Test-Path $_DEVENV_PROJECT_PATH)) {
         return $_DEVENV_PROJECT_PATH
     } else {
-        return (Get-Location).Path
+        $project_dir = (Get-Location).Path
+        if (-not (Test-Path (Join-Path $project_dir ".pcode"))) {
+            return $null
+        }
+        return $project_dir
     }
 }
 
@@ -39,7 +43,7 @@ function getProjectSettings {
     }
 }
 
-function initializeDevProject {
+function loadProjectSettings {
     New-Variable -Scope global -Name _DEVENV_SETTINGS -Force -Value (getProjectSettings)
 }
 
@@ -57,31 +61,29 @@ function updatePwshPrompt {
     $function:_DEVENV_OLD_PROMPT = $function:prompt
 
     function global:_DEVENV_PROMPT {
-        $curr_loc = [string]($executionContext.SessionState.Path.CurrentLocation)
-        $in_project = $curr_loc.StartsWith($_DEVENV_PROJECT_PATH)
-        if (-not $in_project) {
-            Exit-Code | Out-Null
-            $function:prompt = $function:_DEVENV_ORIG_PROMPT
-            # Overwrite currently written prompt so user does not have to hit enter again
-            Write-Host -nonewline "`r"
-            return
-        }
-        $prompt_settings = $_DEVENV_SETTINGS.prompt
-        Write-Host -nonewline @prompt_settings
-    }
-
-    function global:prompt {
         if ($null -eq $_DEVENV_PROJECT_PATH) {
             $function:prompt = $function:_DEVENV_ORIG_PROMPT
             return
         }
-        if ($null -eq $_DEVENV_PROMPT_FIRED) {
-            New-Variable -Name _DEVENV_PROMPT_FIRED -Force -Value $true
-            & $function:_DEVENV_PROMPT
-            return & $function:_DEVENV_OLD_PROMPT
-        } else {
+        if ($null -ne $_DEVENV_PROMPT_FIRED) {
             return & $function:_DEVENV_ORIG_PROMPT
+        } else {
+            New-Variable -Name _DEVENV_PROMPT_FIRED -Force -Value $true
+            $curr_loc = [string]($executionContext.SessionState.Path.CurrentLocation)
+            $in_project = $curr_loc.StartsWith($_DEVENV_PROJECT_PATH)
+            if (-not $in_project) {
+                Exit-Code | Out-Null
+                $function:prompt = $function:_DEVENV_ORIG_PROMPT
+                return & $function:_DEVENV_ORIG_PROMPT
+            }
+            $prompt_settings = $_DEVENV_SETTINGS.prompt
+            Write-Host -nonewline @prompt_settings
+            return & $function:_DEVENV_OLD_PROMPT
         }
+    }
+
+    function global:prompt {
+        return & $function:_DEVENV_PROMPT
     }
 }
 
@@ -105,7 +107,7 @@ function removeWorkspaceAlias {
 
 function aliasFileList {
     $project_dir = getProjectPath
-    if (-not (Test-Path (Join-Path $project_dir ".pcode"))) {
+    if (-not $project_dir) {
         return $null
     }
     $files = (Get-ChildItem -Path ([io.path]::Combine($project_dir, ".pcode")) -File
@@ -224,7 +226,7 @@ function New-Code {
     Write-Output "Copying project template over..."
     Copy-Item -Path (Join-Path $match.FullName "*") -Destination . -Recurse -Force
 
-    initializeDevProject
+    loadProjectSettings
     # Start the initialization script for the environment
     execProjectScript("..init.ps1")
     # Enter the new environment
@@ -236,13 +238,17 @@ function Enter-Code {
         [Parameter(Mandatory=$false)][bool] $update_prompt = $true,
         [Parameter(Mandatory=$false)][bool] $raise_on_failure = $false
     )
-    initializeDevProject
     # Project is already setup or entrant script is not available
     if (($null -ne $_DEVENV_PROJECT_PATH) -or -not (Test-Path (getProjectScriptPath "..enter.ps1"))) {
         return
     }
     # Add project path to Global Project Path variable
-    New-Variable -Scope global -Name _DEVENV_PROJECT_PATH -Force -Value (getProjectPath)
+    $project_dir = getProjectPath
+    if (-not $project_dir) {
+        return
+    }
+    loadProjectSettings
+    New-Variable -Scope global -Name _DEVENV_PROJECT_PATH -Force -Value $project_dir
     try {
         preservePrompt
         # Update the prompt
