@@ -58,7 +58,7 @@ InModuleScope DevEnv {
         $orig_prompt = $function:global:prompt
         $orig_prompt_result = prompt
 
-        $_DEVENV_PROJECT_PATH = "C:\dev\ps_devenv"  # TODO: Come up with better way to identify project path
+        $_DEVENV_PROJECT_PATH = Get-Location
         $tmp_prompt_wi_capture = "TestDrive:\prompt_output.txt"
 
         loadProjectSettings
@@ -84,7 +84,7 @@ InModuleScope DevEnv {
         $orig_prompt = $function:global:prompt
         $orig_prompt_result = prompt
 
-        $_DEVENV_PROJECT_PATH = "C:\dev\ps_devenv"  # TODO: Come up with better way to identify project path
+        $_DEVENV_PROJECT_PATH = Get-Location
         $tmp_prompt_inproj_wi_capture = "TestDrive:\prompt_in_output.txt"
         $tmp_prompt_outproj_wi_capture = "TestDrive:\prompt_out_output.txt"
 
@@ -96,7 +96,7 @@ InModuleScope DevEnv {
         $in_project_result = prompt 6> $tmp_prompt_inproj_wi_capture
 
         # TODO: Come up with better way move out of the project
-        $_DEVENV_PROJECT_PATH = "C:\dev\ps_devenv\doc"
+        $_DEVENV_PROJECT_PATH = [IO.Path]::Combine((Get-Location), "move_out")
 
         $out_project_result = prompt 6> $tmp_prompt_outproj_wi_capture
 
@@ -123,7 +123,7 @@ InModuleScope DevEnv {
         $orig_prompt = $function:global:prompt
         $orig_prompt_result = prompt
 
-        $_DEVENV_PROJECT_PATH = "C:\dev\ps_devenv"  # TODO: Come up with better way to identify project path
+        $_DEVENV_PROJECT_PATH = Get-Location
         $tmp_prompt_wi_capture = "TestDrive:\prompt_output.txt"
 
         loadProjectSettings
