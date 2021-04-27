@@ -51,14 +51,14 @@ function preservePrompt {
     function global:_DEVENV_ORIG_PROMPT {
         ""
     }
-    $function:_DEVENV_ORIG_PROMPT = $function:prompt
+    $function:_DEVENV_ORIG_PROMPT = $function:global:prompt
 }
 
 function updatePwshPrompt {
     function global:_DEVENV_OLD_PROMPT {
         ""
     }
-    $function:_DEVENV_OLD_PROMPT = $function:prompt
+    $function:_DEVENV_OLD_PROMPT = $function:global:prompt
 
     function global:_DEVENV_PROMPT {
         if ($null -eq $_DEVENV_PROJECT_PATH) {
@@ -72,7 +72,7 @@ function updatePwshPrompt {
             $curr_loc = [string]($executionContext.SessionState.Path.CurrentLocation)
             $in_project = $curr_loc.StartsWith($_DEVENV_PROJECT_PATH)
             if (-not $in_project) {
-                Exit-Code | Out-Null
+                Exit-Code $false | Out-Null
                 $function:prompt = $function:_DEVENV_ORIG_PROMPT
                 return & $function:_DEVENV_ORIG_PROMPT
             }
@@ -270,10 +270,20 @@ function Enter-Code {
 }
 
 function Exit-Code {
-    # Run exit script
-    execProjectScript("..exit.ps1")
-    # Remove project aliases
-    removeWorkspaceAlias(aliasFileList)
-    # Reset Global Project Path variable
-    New-Variable -Scope global -Name _DEVENV_PROJECT_PATH -Force -Value $null
+    param(
+        [Parameter(Mandatory=$false)][bool] $raise_on_failure = $true
+    )
+    try {
+        # Run exit script
+        execProjectScript("..exit.ps1")
+        # Remove project aliases
+        removeWorkspaceAlias(aliasFileList)
+    } catch {
+        if ($raise_on_failure) {
+            throw $_
+        }
+    } finally {
+        # Reset Global Project Path variable
+        New-Variable -Scope global -Name _DEVENV_PROJECT_PATH -Force -Value $null
+    }
 }
