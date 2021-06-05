@@ -18,7 +18,7 @@ InModuleScope DevEnv {
         Context "Startup in new directory" {
 
             # Blank out global variable
-            Remove-Variable -Scope global -Name _DEVENV_DIR_HIST
+            Remove-Variable -Scope global -Name _DEVENV_DIR_HIST -ErrorAction:Ignore
 
             $result = userTraversingDownTree "C:\work"
 
@@ -32,7 +32,7 @@ InModuleScope DevEnv {
         Context "Stay in the same directory" {
 
             # Blank out global variable
-            Remove-Variable -Scope global -Name _DEVENV_DIR_HIST
+            Remove-Variable -Scope global -Name _DEVENV_DIR_HIST -ErrorAction:Ignore
 
             userTraversingDownTree "C:\work"
             $result = userTraversingDownTree "C:\work"
@@ -46,7 +46,7 @@ InModuleScope DevEnv {
         Context "Coming up the directory tree" {
 
             # Blank out global variable
-            Remove-Variable -Scope global -Name _DEVENV_DIR_HIST
+            Remove-Variable -Scope global -Name _DEVENV_DIR_HIST -ErrorAction:Ignore
 
             userTraversingDownTree "C:\work\project\subdir"
             $result = userTraversingDownTree "C:\work\project"
@@ -60,7 +60,7 @@ InModuleScope DevEnv {
         Context "Going down the directory tree" {
 
             # Blank out global variable
-            Remove-Variable -Scope global -Name _DEVENV_DIR_HIST
+            Remove-Variable -Scope global -Name _DEVENV_DIR_HIST -ErrorAction:Ignore
 
             userTraversingDownTree "C:\work"
             $result = userTraversingDownTree "C:\work\project"
@@ -72,6 +72,6 @@ InModuleScope DevEnv {
         }
 
         # Cleanup
-        Remove-Variable -Scope global -Name _DEVENV_DIR_HIST
+        Remove-Variable -Scope global -Name _DEVENV_DIR_HIST -ErrorAction:Ignore
     }
 }
