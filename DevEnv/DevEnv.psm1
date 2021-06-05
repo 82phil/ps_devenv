@@ -151,6 +151,24 @@ function templateDirs {
     return $template_dirs
 }
 
+function userTraversingDownTree {
+    param(
+        [Parameter(Mandatory=$true)][string] $curr_loc
+    )
+    # Returns true if the user has either just started in the directory
+    # or is traversing down the directory tree
+    if ($null -eq $_DEVENV_DIR_HIST) {
+        New-Variable -Scope global -Name _DEVENV_DIR_HIST -Value $curr_loc
+    } else {
+        $last_loc = $_DEVENV_DIR_HIST
+        New-Variable -Scope global -Name _DEVENV_DIR_HIST -Value $curr_loc -Force
+        if ($last_loc.StartsWith($curr_loc)) {
+            return $false
+        }
+    }
+    return $true
+}
+
 function Get-Code {
     # Returns the current code template path
     param(
@@ -236,8 +254,15 @@ function New-Code {
 function Enter-Code {
     param(
         [Parameter(Mandatory=$false)][bool] $update_prompt = $true,
-        [Parameter(Mandatory=$false)][bool] $raise_on_failure = $false
+        [Parameter(Mandatory=$false)][bool] $raise_on_failure = $false,
+        [Parameter(Mandatory=$false)][switch] $auto_entry
     )
+    if ($auto_entry.IsPresent) {
+        $curr_loc = [string]($executionContext.SessionState.Path.CurrentLocation)
+        if (-not (userTraversingDownTree $curr_loc)) {
+            return
+        }
+    }
     # Project is already setup or entrant script is not available
     if (($null -ne $_DEVENV_PROJECT_PATH) -or -not (Test-Path (getProjectScriptPath "..enter.ps1"))) {
         return
