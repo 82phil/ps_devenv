@@ -18,6 +18,7 @@ InModuleScope DevEnv {
         Context "_DEVENV_PROJECT_PATH not defined" {
 
             Mock Get-Location { @{"Path" = "Current Dir Location"} }
+            Mock Test-Path { $true }
 
             $path = getProjectPath
 
@@ -32,6 +33,7 @@ InModuleScope DevEnv {
             $_DEVENV_PROJECT_PATH = "Bad Path"
             Mock Get-Location { @{"Path" = "Current Dir Location"} }
             Mock Test-Path { $false }
+            Mock Test-Path { $true } -ParameterFilter {$Path -eq "Current Dir Location`\.pcode"}
 
             $path = getProjectPath
 

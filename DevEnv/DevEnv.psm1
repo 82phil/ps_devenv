@@ -2,7 +2,11 @@ function getProjectPath {
     if ($null -ne $_DEVENV_PROJECT_PATH -and (Test-Path $_DEVENV_PROJECT_PATH)) {
         return $_DEVENV_PROJECT_PATH
     } else {
-        return (Get-Location).Path
+        $project_dir = (Get-Location).Path
+        if (-not (Test-Path (Join-Path $project_dir ".pcode"))) {
+            return $null
+        }
+        return $project_dir
     }
 }
 
@@ -39,35 +43,47 @@ function getProjectSettings {
     }
 }
 
-function updatePwshPrompt {
+function loadProjectSettings {
     New-Variable -Scope global -Name _DEVENV_SETTINGS -Force -Value (getProjectSettings)
+}
 
+function preservePrompt {
+    function global:_DEVENV_ORIG_PROMPT {
+        ""
+    }
+    $function:_DEVENV_ORIG_PROMPT = $function:global:prompt
+}
+
+function updatePwshPrompt {
     function global:_DEVENV_OLD_PROMPT {
         ""
     }
-    $function:_DEVENV_OLD_PROMPT = $function:prompt
+    $function:_DEVENV_OLD_PROMPT = $function:global:prompt
 
     function global:_DEVENV_PROMPT {
-        $curr_loc = [string]($executionContext.SessionState.Path.CurrentLocation)
-        $in_project = $curr_loc.StartsWith($_DEVENV_PROJECT_PATH)
-        if (-not $in_project) {
-            Exit-Code | Out-Null
-            $function:prompt = $function:_DEVENV_OLD_PROMPT
-            # Overwrite currently written prompt so user does not have to hit enter again
-            Write-Host -nonewline "`r"
-            return
-        }
         if ($null -eq $_DEVENV_PROJECT_PATH) {
-            $function:prompt = $function:_DEVENV_OLD_PROMPT
+            $function:prompt = $function:_DEVENV_ORIG_PROMPT
             return
         }
-        $prompt_settings = $_DEVENV_SETTINGS.prompt
-        Write-Host -nonewline @prompt_settings
+        if ($null -ne $_DEVENV_PROMPT_FIRED) {
+            return & $function:_DEVENV_ORIG_PROMPT
+        } else {
+            New-Variable -Name _DEVENV_PROMPT_FIRED -Force -Value $true
+            $curr_loc = [string]($executionContext.SessionState.Path.CurrentLocation)
+            $in_project = $curr_loc.StartsWith($_DEVENV_PROJECT_PATH)
+            if (-not $in_project) {
+                Exit-Code $false | Out-Null
+                $function:prompt = $function:_DEVENV_ORIG_PROMPT
+                return & $function:_DEVENV_ORIG_PROMPT
+            }
+            $prompt_settings = $_DEVENV_SETTINGS.prompt
+            Write-Host -nonewline @prompt_settings
+            return & $function:_DEVENV_OLD_PROMPT
+        }
     }
 
     function global:prompt {
-        & $function:_DEVENV_PROMPT
-        return & $function:_DEVENV_OLD_PROMPT
+        return & $function:_DEVENV_PROMPT
     }
 }
 
@@ -91,7 +107,7 @@ function removeWorkspaceAlias {
 
 function aliasFileList {
     $project_dir = getProjectPath
-    if (-not (Test-Path (Join-Path $project_dir ".pcode"))) {
+    if (-not $project_dir) {
         return $null
     }
     $files = (Get-ChildItem -Path ([io.path]::Combine($project_dir, ".pcode")) -File
@@ -133,6 +149,24 @@ function templateDirs {
         }
     }
     return $template_dirs
+}
+
+function userTraversingDownTree {
+    param(
+        [Parameter(Mandatory=$true)][string] $curr_loc
+    )
+    # Returns true if the user has either just started in the directory
+    # or is traversing down the directory tree
+    if ($null -eq $_DEVENV_DIR_HIST) {
+        New-Variable -Scope global -Name _DEVENV_DIR_HIST -Value $curr_loc
+    } else {
+        $last_loc = $_DEVENV_DIR_HIST
+        New-Variable -Scope global -Name _DEVENV_DIR_HIST -Value $curr_loc -Force
+        if ($last_loc.StartsWith($curr_loc)) {
+            return $false
+        }
+    }
+    return $true
 }
 
 function Get-Code {
@@ -210,32 +244,47 @@ function New-Code {
     Write-Output "Copying project template over..."
     Copy-Item -Path (Join-Path $match.FullName "*") -Destination . -Recurse -Force
 
-    # Update the prompt
-    updatePwshPrompt
+    loadProjectSettings
     # Start the initialization script for the environment
     execProjectScript("..init.ps1")
     # Enter the new environment
-    Enter-Code -update_prompt $false
+    Enter-Code -update_prompt $true
 }
 
 function Enter-Code {
     param(
         [Parameter(Mandatory=$false)][bool] $update_prompt = $true,
-        [Parameter(Mandatory=$false)][bool] $raise_on_failure = $false
+        [Parameter(Mandatory=$false)][bool] $raise_on_failure = $false,
+        [Parameter(Mandatory=$false)][switch] $auto_entry
     )
+    if ($auto_entry.IsPresent) {
+        $curr_loc = [string]($executionContext.SessionState.Path.CurrentLocation)
+        if (-not (userTraversingDownTree $curr_loc)) {
+            return
+        }
+    }
     # Project is already setup or entrant script is not available
     if (($null -ne $_DEVENV_PROJECT_PATH) -or -not (Test-Path (getProjectScriptPath "..enter.ps1"))) {
         return
     }
+    # Add project path to Global Project Path variable
+    $project_dir = getProjectPath
+    if (-not $project_dir) {
+        return
+    }
+    loadProjectSettings
+    New-Variable -Scope global -Name _DEVENV_PROJECT_PATH -Force -Value $project_dir
     try {
-        # Add project path to Global Project Path variable
-        New-Variable -Scope global -Name _DEVENV_PROJECT_PATH -Force -Value (getProjectPath)
+        preservePrompt
         # Update the prompt
         if ($update_prompt) {
             updatePwshPrompt
         }
         # Run enterance script
         execProjectScript("..enter.ps1")
+        if ($update_prompt) {
+            updatePwshPrompt
+        }
         # Create project aliases
         createWorkspaceAlias(aliasFileList)
     } catch {
@@ -246,10 +295,20 @@ function Enter-Code {
 }
 
 function Exit-Code {
-    # Run exit script
-    execProjectScript("..exit.ps1")
-    # Remove project aliases
-    removeWorkspaceAlias(aliasFileList)
-    # Reset Global Project Path variable
-    New-Variable -Scope global -Name _DEVENV_PROJECT_PATH -Force -Value $null
+    param(
+        [Parameter(Mandatory=$false)][bool] $raise_on_failure = $true
+    )
+    try {
+        # Run exit script
+        execProjectScript("..exit.ps1")
+        # Remove project aliases
+        removeWorkspaceAlias(aliasFileList)
+    } catch {
+        if ($raise_on_failure) {
+            throw $_
+        }
+    } finally {
+        # Reset Global Project Path variable
+        New-Variable -Scope global -Name _DEVENV_PROJECT_PATH -Force -Value $null
+    }
 }

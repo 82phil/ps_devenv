@@ -40,29 +40,20 @@ Now that you have set up an environment, you can easily come back to it later on
 3. Type `Exit-Code` to tear down the environment, or simply leave the project
 directory.
 
-## Tracking Project Directories
+> Keep reading for information on how to automatically perform these
+> operations simply by changing in and out of the project directory
 
-Currently this is a work in progress. Exiting the project directory is
-tracked, but not the entrance into the project. Use `Enter-Code` for now.
+## Change the Project prompt
 
 The `.settings.json` file in `.pcode` that allows you to change the prompt of
 the project. UTF8 encoding is supported, use Windows Terminal for characters
 such as emojis to work.
 
-By default the prompt is updated before executing the entrant code so, for
-example, the Python virtualenv will also update the prompt and will appear
-like so:
-
-![default prompt](./doc/default_prompt.png)
-
-However there is a trick if you want to only see the devenv prompt, simply add
-a carriage return to the beginning of the prompt.
-
 ```json
 {
     "version": 1.0,
     "prompt": {
-        "Object": "\r🐍 ",
+        "Object": "🐍 ",
         "BackgroundColor": null,
         "ForegroundColor": null
     }
@@ -74,30 +65,40 @@ a carriage return to the beginning of the prompt.
 
 # Installation 
 
-## Module installation
-
 This module is available from the PowerShell Gallery, perform the following:
 
 ```
 Install-Module DevEnv -Scope CurrentUser
 ```
 
-## Add `Enter-Code` to your PowerShell Profile
+## Setup Project Directory Tracking
 
-Automatically enter your development environment when starting a shell in your
+Automatically enter your development environment when entering the
 project directory.
 
-![Enter-Code Added to profile](./doc/enter_code_added_to_profile.gif)
+![Enter-Code Added to profile](./doc/cd_project_tracking.gif)
 
-Simply add `Enter-Code` to your PowerShell Profile by either editing it with
-a text editor (ex: `notepad.exe $profile`) or running the following in
-PowerShell to append it to the end of the profile.
+Run the following in PowerShell to append the project detection code to the end of the profile.
 
 ```powershell
 if (-not (test-path $profile)) {
     new-item -path $profile -itemtype file -force
 }
-Add-Content $profile "`nEnter-Code"
+Add-Content $profile @'
+### DevEnv detect project directories ###
+function global:_PWSH_ORIG_PROMPT {
+    ""
+}
+$function:_PSWH_ORIG_PROMPT = $function:prompt
+function global:prompt {
+  if (Enter-Code -auto_entry) {
+    return & $function:_DEVENV_PROMPT
+  } else {
+    return & $function:_PSWH_ORIG_PROMPT
+  }
+}
+######
+'@
 ```
 
 # Create your templates
