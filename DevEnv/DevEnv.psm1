@@ -121,10 +121,14 @@ function getProjectScriptPath {
 
 }
 function execProjectScript {
-    Param([string] $script)
+    param(
+        [Parameter(Mandatory=$true)][string] $script,
+        [Parameter(Mandatory=$false)][string] $option = ""
+    )
+
     $script_filepath = getProjectScriptPath $script
     if (Test-Path $script_filepath) {
-        . $script_filepath
+        . $script_filepath $option
     } else {
         throw "Did not find script file {0} in .pcode" -f ($script)
     }
@@ -235,8 +239,8 @@ function Set-Code {
 
 function New-Code {
     param(
-        [Parameter(Mandatory=$true)][string]$code_type,
-        [Parameter(Mandatory=$false)][string]$option
+        [Parameter(Mandatory=$true)][string] $code_type,
+        [Parameter(Mandatory=$false)][string] $option = ""
     )
     $match = Get-Code($code_type)
 
@@ -246,7 +250,7 @@ function New-Code {
 
     loadProjectSettings
     # Start the initialization script for the environment
-    execProjectScript("..init.ps1")
+    execProjectScript "..init.ps1" -option $option
     # Enter the new environment
     Enter-Code -update_prompt $true
 }
