@@ -127,4 +127,30 @@ Describe "Python Installations from Windows Store" {
                 "python.exe"))
         }
     }
+
+    context "Get-PythonInstalls with one Python installation" {
+
+        # Have just one install from the Windows Store
+        Mock Get-AppxPackage { return [PSCustomObject]@{
+            "Name" = "PythonSoftwareFoundation.Python.3.7"
+            "PackageFamilyName" = "PythonSoftwareFoundation.Python.3.7_qbz5n2kfra8p0"
+        }}
+
+        Mock Test-Path { return $true }
+
+        # Disables Get-PythonFromRegistry so it won't detect local installs
+        Mock Get-PythonFromRegistry { return $null }
+
+        Mock Get-PythonInfo { return [PSCustomObject]@{
+            FullPath = "TestPythonWindowsStore"
+        }}
+
+        [array]$installs = Get-PythonInstalls
+
+        It "Get-PythonInstalls query returns 1 item" {
+            $installs.Count | Should Be 1
+            $installs[0].FullPath | Should Be "TestPythonWindowsStore"
+        }
+
+    }
 }

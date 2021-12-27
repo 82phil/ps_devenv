@@ -70,6 +70,52 @@ function Get-PythonInfo($python_paths) {
     return $py_info
 }
 
+function Get-PythonInstalls() {
+    Param(
+        # Specify the specific Python Version to use
+        [Parameter(Mandatory=$False,Position=1)]
+        [string]$desiredVersion
+    )
+
+    $python_cores = @()
+    $python_cores += Get-PythonFromRegistry
+    $python_cores += Get-PythonFromAppx
+    $py_installs = @(PythonInfo($python_cores) | Sort-Object -Property versionInfo)
+
+    if ($desiredVersion) {
+        $py_installs = @($py_installs | Where-Object { $_.versionInfo[0..2] -Join "." -Match $desiredVersion})
+    }
+
+    if ($py_installs.Count -lt 1) {
+        if ($desiredVersion) {
+            throw "Could not find a Python Installation matching version {0}" -f $desiredVersion
+        } else {
+            throw "Could not find a Python Installation!"
+        }
+        exit 1
+    }
+
+    return $py_installs
+}
+
+function Get-PythonUsersChoice() {
+    Param(
+        # Specify the specific Python Version to use
+        [Parameter(Mandatory=$False,Position=1)]
+        [string]$desiredVersion
+    )
+
+    [array]$py_installs = Get-PythonInstalls $desiredVersion
+
+    if ($py_installs.count -gt 1) {
+        $python = (dispMenu($py_installs))
+    } else {
+        $python = $py_installs[0]
+    }
+
+    return $python
+}
+
 function dispMenu {
     param($py_installs)
     Write-Output "========== Choose Python Version to use ==========" | Out-Host
@@ -92,26 +138,7 @@ function dispMenu {
 }
 
 function main {
-    $python_cores = Get-PythonFromRegistry
-    $python_cores += Get-PythonFromAppx
-    $py_installs = @(PythonInfo($python_cores) | Sort-Object -Property versionInfo)
-
-    if ($desiredVersion) {
-        $py_installs = @($py_installs | Where-Object { $_.versionInfo[0..2] -Join "." -Match $desiredVersion})
-    }
-    if ($py_installs.Count -lt 1) {
-        if ($desiredVersion) {
-            throw "Could not find a Python Installation matching version {0}" -f $desiredVersion
-        } else {
-            throw "Could not find a Python Installation!"
-        }
-        exit 1
-    }
-    if ($py_installs.count -gt 1) {
-        $python = (dispMenu($py_installs))
-    } else {
-        $python = $py_installs[0]
-    }
+    $python = Get-PythonUsersChoice $desiredVersion
     # Start building the env
     Write-Output "Building Virtual Environment..."
     if (Test-Path env:PWD) {
