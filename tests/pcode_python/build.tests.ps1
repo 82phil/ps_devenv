@@ -142,6 +142,8 @@ Describe "Python Installations from Windows Store" {
         Mock Get-PythonFromRegistry { return $null }
 
         Mock Get-PythonInfo { return [PSCustomObject]@{
+            versionInfo = @(3, 9, 7)
+            is64Bit = "False"
             FullPath = "TestPythonWindowsStore"
         }}
 

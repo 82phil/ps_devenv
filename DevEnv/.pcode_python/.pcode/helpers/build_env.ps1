@@ -80,7 +80,8 @@ function Get-PythonInstalls() {
     $python_cores = @()
     $python_cores += Get-PythonFromRegistry
     $python_cores += Get-PythonFromAppx
-    $py_installs = @(PythonInfo($python_cores) | Sort-Object -Property versionInfo)
+
+    $py_installs = @(Get-PythonInfo($python_cores))
 
     if ($desiredVersion) {
         $py_installs = @($py_installs | Where-Object { $_.versionInfo[0..2] -Join "." -Match $desiredVersion})
@@ -94,8 +95,7 @@ function Get-PythonInstalls() {
         }
         exit 1
     }
-
-    return $py_installs
+    return $py_installs | Sort-Object {$_.versionInfo[0]}, {$_.versionInfo[1]}, {$_.versionInfo[2]}, {$_.is64Bit} -Descending
 }
 
 function Get-PythonUsersChoice() {
