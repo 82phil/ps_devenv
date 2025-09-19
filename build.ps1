@@ -34,7 +34,7 @@ function Resolve-Module
 
                     Write-Verbose -Message "$($ModuleName) Installed Version [$($Version.tostring())] does not match required. Installing Required Version [$($ReqVersion.tostring())]"
 
-                    Install-Module -Name $ModuleName -Force -RequiredVersion $ReqVersion
+                    Install-Module -Name $ModuleName -Force -RequiredVersion $ReqVersion -Scope CurrentUser -SkipPublisherCheck
                     Import-Module -Name $ModuleName -Force -RequiredVersion $ReqVersion
                 }
                 else
