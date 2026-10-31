@@ -156,3 +156,39 @@ Describe "Python Installations from Windows Store" {
 
     }
 }
+
+Describe "Python virtual environment directories" {
+
+    It "uses the first configured directory when creating a virtual environment" {
+        $global:_DEVENV_SETTINGS = @{
+            venv_dirnames = @("custom-venv", ".venv")
+        }
+
+        Get-VenvCreateDirName | Should Be "custom-venv"
+    }
+
+    It "uses the default directory names when no setting is configured" {
+        $global:_DEVENV_SETTINGS = @{}
+
+        (Get-VenvDirNamesSetting) | Should Be @("venv", ".venv")
+        Get-VenvCreateDirName | Should Be "venv"
+    }
+
+    It "finds an existing virtual environment using a configured directory name" {
+        $global:_DEVENV_SETTINGS = @{
+            venv_dirnames = @("venv", ".venv")
+        }
+        $search_path = Join-Path ([IO.Path]::GetTempPath()) ([Guid]::NewGuid().ToString())
+        $venv_scripts = Join-Path $search_path ".venv\Scripts"
+        $venv_python = Join-Path $search_path ".venv\Scripts\python.exe"
+
+        try {
+            New-Item -ItemType Directory -Path $venv_scripts -Force | Out-Null
+            New-Item -ItemType File -Path $venv_python -Force | Out-Null
+            (Get-ProjectVenv -SearchPath $search_path) |
+                Should Be (Join-Path $search_path ".venv")
+        } finally {
+            Remove-Item -Recurse -Force $search_path
+        }
+    }
+}
