@@ -98,6 +98,37 @@ function Get-PythonInstalls() {
     return $py_installs | Sort-Object {$_.versionInfo[0]}, {$_.versionInfo[1]}, {$_.versionInfo[2]}, {$_.is64Bit} -Descending
 }
 
+# Returns the first configured dirname used when creating a venv
+function Get-VenvCreateDirName {
+    $venv_dirnames = Get-VenvDirNamesSetting
+    if ($venv_dirnames.Count -gt 0 -and
+        -not [string]::IsNullOrWhiteSpace($venv_dirnames[0])) {
+        return [string]$venv_dirnames[0]
+    }
+    return 'venv'
+}
+
+# Returns dirnames searched for existing venvs
+function Get-VenvDirNamesSetting {
+    if ($null -ne $global:_DEVENV_SETTINGS -and
+        $global:_DEVENV_SETTINGS.ContainsKey('venv_dirnames')) {
+        return @($global:_DEVENV_SETTINGS['venv_dirnames'])
+    }
+    return @('venv', '.venv')
+}
+
+
+# Returns the path of an existing venv in the project, or $null if none exists
+function Get-ProjectVenv([string]$SearchPath = (Get-Location).Path) {
+    foreach ($name in Get-VenvDirNamesSetting) {
+        $venv_path = Join-Path $SearchPath -ChildPath $name
+        if (Test-Path (Join-Path $venv_path -ChildPath "Scripts\python.exe")) {
+            return $venv_path
+        }
+    }
+    return $null
+}
+
 function Get-PythonUsersChoice() {
     Param(
         # Specify the specific Python Version to use
@@ -138,9 +169,6 @@ function dispMenu {
 }
 
 function main {
-    $python = Get-PythonUsersChoice $desiredVersion
-    # Start building the env
-    Write-Output "Building Virtual Environment..."
     if (Test-Path env:PWD) {
         Set-Location $env:PWD
     } else {
@@ -149,21 +177,35 @@ function main {
         Set-Location ..
         }
     }
+    $existing_venv = Get-ProjectVenv
+    if ($existing_venv) {
+        Write-Warning "An existing virtual environment was found at $existing_venv"
+        $answer = Read-Host "Remove it? (y/N)"
+        if ($answer -notmatch '^[yY]') {
+            return
+        }
+        Remove-Item -Recurse -Force $existing_venv
+        Write-Output "Removed existing virtual environment at $existing_venv"
+    }
+    $venv_dir = Get-VenvCreateDirName
+    $python = Get-PythonUsersChoice $desiredVersion
+    # Start building the env
+    Write-Output "Building Virtual Environment..."
     try {
         if ($python.versionInfo[0] -eq "2") {
             # Python 2.7 virtualenv
-            & $python.FullPath -m virtualenv venv --no-download
+            & $python.FullPath -m virtualenv $venv_dir --no-download
         } else {
             # Python 3 comes with venv, but desire to use virtualenv if available
-            & $python.FullPath -m virtualenv venv --no-download
+            & $python.FullPath -m virtualenv $venv_dir --no-download
             if (-not $?) {
                 Write-Output "Using Built-in venv instead..."
-                & $python.FullPath -m venv venv
+                & $python.FullPath -m venv $venv_dir
             }
         }
 
         # Run the activation script
-        & .\venv\Scripts\activate.ps1
+        & (Join-Path $venv_dir "Scripts\activate.ps1")
     } catch {
         throw
         Write-Output "Failed to Create the Virtual Environment!"
@@ -172,7 +214,7 @@ function main {
     # Install requirements
     if (Test-Path "requirements.txt") {
         Write-Output "Installing PIP packages listed in requirements"
-        & python -m pip install -r requirements.txt
+        & (Join-Path $venv_dir "Scripts\python.exe") -m pip install -r requirements.txt
     }
     Write-Output "Virtual Env up"
 }
