@@ -136,7 +136,6 @@ function Get-PythonUsersChoice() {
         [string]$desiredVersion
     )
 
-    # TODO: Make a way to detect existing venv and add it to the choices
     [array]$py_installs = Get-PythonInstalls $desiredVersion
 
     if ($py_installs.count -gt 1) {
