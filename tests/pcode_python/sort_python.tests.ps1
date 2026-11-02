@@ -34,7 +34,7 @@ Describe "Get-PythonInstalls Sorting Tests" {
                 [PSCustomObject]@{ versionInfo = @(2, 7, 18); is64Bit = "True"; FullPath = "C:\Python27\python.exe" },
                 [PSCustomObject]@{ versionInfo = @(3, 9, 7); is64Bit = "False"; FullPath = "C:\Python39\python.exe" }
                 [PSCustomObject]@{ versionInfo = @(3, 8, 10); is64Bit = "True"; FullPath = "C:\Python38\python.exe" },
-                [PSCustomObject]@{ versionInfo = @(3, 10, 1); is64Bit = "True"; FullPath = "C:\Python38\python.exe" },
+                [PSCustomObject]@{ versionInfo = @(3, 10, 1); is64Bit = "True"; FullPath = "C:\Python310\python.exe" },
                 [PSCustomObject]@{ versionInfo = @(3, 9, 7); is64Bit = "True"; FullPath = "C:\WindowsApps\Python39\python.exe" }
             )
         }
@@ -84,6 +84,34 @@ Describe "Get-PythonInstalls Sorting Tests" {
             Mock PythonInfo { return @() }
 
             { Get-PythonInstalls } | Should -Throw "Could not find a Python Installation!"
+        }
+    }
+
+    Context "When a store installation updates the registry with the Python installation" {
+        Mock Get-PythonFromRegistry {
+            return @("C:\Program Files\WindowsApps\Python39\python3.9.exe")
+        }
+
+        Mock Get-PythonFromAppx {
+            return @("C:\Users\me\AppData\Local\Microsoft\WindowsApps\Python39\python.exe")
+        }
+
+        Mock Get-PythonInfo {
+            param($python_paths)
+            return @($python_paths | ForEach-Object {
+                [PSCustomObject]@{
+                    versionInfo = @(3, 9, 7)
+                    is64Bit = "True"
+                    FullPath = $_
+                    basePrefix = "C:\Program Files\WindowsApps\Python39"
+                }
+            })
+        }
+
+        It "Should find only one installation" {
+            $result = @(Get-PythonInstalls)
+
+            $result.Count | Should be 1
         }
     }
 }
