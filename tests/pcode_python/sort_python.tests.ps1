@@ -109,7 +109,7 @@ Describe "Get-PythonInstalls Sorting Tests" {
         }
 
         It "Should find only one installation" {
-            $result = Get-PythonInstalls
+            $result = @(Get-PythonInstalls)
 
             $result.Count | Should be 1
         }
