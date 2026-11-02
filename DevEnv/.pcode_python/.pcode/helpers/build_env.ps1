@@ -81,7 +81,18 @@ function Get-PythonInstalls() {
     $python_cores += Get-PythonFromRegistry
     $python_cores += Get-PythonFromAppx
 
-    $py_installs = @(Get-PythonInfo($python_cores))
+    # This is to address an observed issue where store Python installs have
+    # a registry entry for the same Python installation.
+    $seen_installs = @{}
+    $py_installs = @()
+    foreach ($install in @(Get-PythonInfo($python_cores))) {
+        # base prefix will have the same path, using the full path as a fallback (may not work)
+        $key = if ($install.basePrefix) { $install.basePrefix } else { $install.FullPath }
+        if (-not $seen_installs.ContainsKey($key)) {
+            $seen_installs[$key] = $true
+            $py_installs += $install
+        }
+    }
 
     if ($desiredVersion) {
         $py_installs = @($py_installs | Where-Object { $_.versionInfo[0..2] -Join "." -Match $desiredVersion})
